@@ -18,186 +18,14 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* ============================================
-   LIQUID GLASS — iOS 26 style
-   Efecto de vidrio líquido con refracción,
-   brillo especular animado y bordes cromáticos
-   ============================================ */
 .apple-glass {
-  position: relative;
-  background:
-    /* Capa especular diagonal — la "línea de luz" */
-    linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0.0) 0%,
-      rgba(255, 255, 255, 0.12) 30%,
-      rgba(255, 255, 255, 0.0) 50%,
-      rgba(120, 180, 255, 0.08) 70%,
-      rgba(255, 255, 255, 0.0) 100%
-    ),
-    /* Capa base glassmórfica */
-    linear-gradient(
-      160deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.02) 100%
-    );
-  backdrop-filter: blur(40px) saturate(1.9) brightness(1.1);
-  -webkit-backdrop-filter: blur(40px) saturate(1.9) brightness(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.5),
-    /* Línea de luz superior — specular highlight */
-    inset 0 1px 1px rgba(255, 255, 255, 0.3),
-    /* Brillo inferior sutil */
-    inset 0 -1px 1px rgba(255, 255, 255, 0.06),
-    /* Glow externo coloreado */
-    0 0 40px rgba(100, 160, 255, 0.04);
-  overflow: hidden;
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
-/* Desactivar pseudo-elementos en badges y marquee */
-.apple-glass.rounded-full.px-4::before,
-.apple-glass.rounded-full.px-4::after,
-.apple-glass.border-x-0::before,
-.apple-glass.border-x-0::after {
-  display: none;
-}
-
-/* --- CAPA 1: Reflejo de luz líquida que se mueve --- */
-.apple-glass::before {
-  content: "";
-  position: absolute;
-  top: -80%;
-  left: -80%;
-  width: 260%;
-  height: 260%;
-  background:
-    /* Punto de luz principal — se mueve como reflejo en agua */
-    radial-gradient(
-      ellipse 40% 30% at 40% 35%,
-      rgba(255, 255, 255, 0.18) 0%,
-      rgba(255, 255, 255, 0.06) 30%,
-      transparent 70%
-    ),
-    /* Tinte cromático cian */
-    radial-gradient(
-      circle at 70% 60%,
-      rgba(100, 200, 255, 0.1) 0%,
-      transparent 50%
-    ),
-    /* Tinte cromático púrpura */
-    radial-gradient(
-      circle at 20% 70%,
-      rgba(160, 100, 255, 0.08) 0%,
-      transparent 50%
-    );
-  pointer-events: none;
-  z-index: 1;
-  animation: liquidRefraction 10s ease-in-out infinite alternate;
-}
-
-/* --- CAPA 2: Borde con refracción cromática visible --- */
-.apple-glass::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgba(130, 210, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.15) 20%,
-    transparent 40%,
-    transparent 60%,
-    rgba(180, 130, 255, 0.25) 80%,
-    rgba(130, 210, 255, 0.3) 100%
-  );
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-  padding: 1.5px;
-  pointer-events: none;
-  z-index: 2;
-  animation: liquidChroma 8s ease-in-out infinite alternate;
-}
-
-/* Refracción líquida — la luz "nada" por la superficie */
-@keyframes liquidRefraction {
-  0% {
-    transform: translate(0%, 0%) rotate(0deg) scale(1);
-    opacity: 0.7;
-  }
-  25% {
-    transform: translate(15%, 8%) rotate(3deg) scale(1.05);
-    opacity: 1;
-  }
-  50% {
-    transform: translate(5%, 15%) rotate(-1deg) scale(0.98);
-    opacity: 0.85;
-  }
-  75% {
-    transform: translate(-10%, 5%) rotate(2deg) scale(1.02);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-5%, -5%) rotate(-2deg) scale(1);
-    opacity: 0.8;
-  }
-}
-
-/* Los colores del borde mutan suavemente */
-@keyframes liquidChroma {
-  0% {
-    opacity: 0.6;
-    filter: hue-rotate(0deg);
-  }
-  50% {
-    opacity: 1;
-    filter: hue-rotate(25deg);
-  }
-  100% {
-    opacity: 0.7;
-    filter: hue-rotate(-15deg);
-  }
-}
-
-/* ---- HOVER: el liquid glass reacciona ---- */
-.apple-glass:hover {
-  background:
-    linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0.0) 0%,
-      rgba(255, 255, 255, 0.18) 30%,
-      rgba(255, 255, 255, 0.0) 50%,
-      rgba(120, 180, 255, 0.12) 70%,
-      rgba(255, 255, 255, 0.0) 100%
-    ),
-    linear-gradient(
-      160deg,
-      rgba(255, 255, 255, 0.12) 0%,
-      rgba(255, 255, 255, 0.03) 100%
-    );
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow:
-    0 12px 56px rgba(0, 0, 0, 0.6),
-    inset 0 1px 2px rgba(255, 255, 255, 0.35),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.1),
-    0 0 60px rgba(100, 160, 255, 0.08);
-}
-
-.apple-glass:hover::before {
-  animation-duration: 4s;
-}
-
-.apple-glass:hover::after {
-  opacity: 1;
-  animation-duration: 3s;
-}
-
-/* ============================================
-   TIPOGRAFÍA
-   ============================================ */
 .text-gradient {
   background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.4) 100%);
   -webkit-background-clip: text;
@@ -208,9 +36,6 @@ body {
   background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
 }
 
-/* ============================================
-   ANIMACIONES BASE
-   ============================================ */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
@@ -229,9 +54,6 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ============================================
-   SCROLLBAR
-   ============================================ */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -245,9 +67,7 @@ body {
   border-radius: 10px;
 }
 
-/* ============================================
-   HERO FLUID BACKGROUND
-   ============================================ */
+/* Futuristic Animated Fluid Background */
 .valeum-hero-container {
   position: relative;
   width: 100%;
@@ -291,18 +111,4 @@ body {
   33% { transform: rotate(5deg) scale(1.1) translate(2%, 3%); }
   66% { transform: rotate(-5deg) scale(0.9) translate(-2%, -1%); }
   100% { transform: rotate(0deg) scale(1); }
-}
-
-/* ============================================
-   INPUTS LIQUID GLASS
-   ============================================ */
-input, select, textarea {
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-input:focus, select:focus, textarea:focus {
-  box-shadow:
-    0 0 0 1px rgba(59, 130, 246, 0.3),
-    0 0 20px rgba(59, 130, 246, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
