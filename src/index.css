@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 24px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #000;
+  color: #fff;
+  overflow-x: hidden;
+  letter-spacing: -0.01em;
+}
+
+.apple-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.4) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-gradient {
+  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.transition-page {
+  animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 10px;
+}
+
+/* Futuristic Animated Fluid Background */
+.valeum-hero-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: #000b1a; /* Fondo oscuro base para profundidad */
+}
+
+/* Capa de Gradiente de Malla con Movimiento */
+.valeum-hero-container::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(0, 210, 255, 0.5) 0%, transparent 50%), /* Cian */
+    radial-gradient(circle at 70% 20%, rgba(112, 0, 255, 0.5) 0%, transparent 50%), /* Violeta */
+    radial-gradient(circle at 40% 80%, rgba(0, 40, 120, 0.4) 0%, transparent 60%),  /* Azul profundo */
+    radial-gradient(circle at 80% 70%, rgba(140, 0, 255, 0.3) 0%, transparent 50%); /* Púrpura */
+  
+  /* Filtro Glassmorphism */
+  filter: blur(80px);
+  animation: fluidMovement 25s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+/* Filtro de "Vidrio" */
+.valeum-hero-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(20px);
+  background: rgba(0, 11, 26, 0.2); /* Sutil tinte oscuro */
+  z-index: 2;
+}
+
+/* Contenido (Texto y Botón) */
+.hero-content-wrapper {
+  position: relative;
+  z-index: 10; /* Siempre por encima del fondo */
+}
+
+/* --- ANIMACIÓN LÍQUIDA --- */
+@keyframes fluidMovement {
+  0% { transform: rotate(0deg) scale(1); }
+  33% { transform: rotate(5deg) scale(1.1) translate(2%, 3%); }
+  66% { transform: rotate(-5deg) scale(0.9) translate(-2%, -1%); }
+  100% { transform: rotate(0deg) scale(1); }
+}
