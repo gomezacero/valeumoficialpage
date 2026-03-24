@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X } from 'lucide-react';
+import { motion } from 'motion/react';
 import Home from "./pages/Home";
 import Jobs from "./pages/Jobs";
 
@@ -25,11 +26,21 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!navRef.current) return;
+    const rect = navRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    navRef.current.style.setProperty('--mouse-x', `${x}%`);
+    navRef.current.style.setProperty('--mouse-y', `${y}%`);
   }, []);
 
   const handleNav = (path: string, hash?: string) => {
@@ -46,24 +57,41 @@ const Header = () => {
 
   return (
     <>
-      <header className={`fixed top-0 w-full z-50 transition-all duration-500 ${scrolled ? 'py-4' : 'py-8'}`}>
+      <header className={`fixed top-0 w-full z-50 transition-all duration-700 ${scrolled ? 'py-4' : 'py-8'}`}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className={`apple-glass rounded-full px-8 py-3 flex justify-between items-center transition-all duration-500 ${scrolled ? 'shadow-2xl' : 'bg-transparent border-transparent shadow-none'}`}>
-            <div className="flex items-center gap-2 group cursor-pointer" onClick={() => handleNav('/')}>
-              <span className="text-xl font-extrabold tracking-tighter text-white">VALEUM</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
-            </div>
-            
-            <nav className="hidden md:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
-              <button onClick={() => handleNav('/', '#servicios')} className="hover:text-white transition-colors">Servicios</button>
-              <button onClick={() => handleNav('/jobs')} className={`hover:text-white transition-colors ${location.pathname === '/jobs' ? 'text-white' : ''}`}>Careers</button>
-              <button onClick={() => handleNav('/', '#contacto')} className="text-white bg-white/10 px-6 py-2 rounded-full border border-white/10 hover:bg-white hover:text-black transition-all">Match</button>
-            </nav>
+          <motion.div
+            ref={navRef}
+            onMouseMove={handleMouseMove}
+            className={`gorilla-glass rounded-full px-8 py-3 transition-all duration-700 ${
+              scrolled ? 'gorilla-glass-scrolled' : ''
+            }`}
+            initial={false}
+            animate={{
+              borderColor: scrolled ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)',
+            }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Capa de luz que sigue el cursor */}
+            <div className="gorilla-glass-light" />
 
-            <button className="md:hidden p-2 text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
+            {/* Contenido del navbar */}
+            <div className="gorilla-glass-content">
+              <div className="flex items-center gap-2 group cursor-pointer" onClick={() => handleNav('/')}>
+                <span className="text-xl font-extrabold tracking-tighter text-white">VALEUM</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+              </div>
+
+              <nav className="hidden md:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
+                <button onClick={() => handleNav('/', '#servicios')} className="hover:text-white transition-colors">Servicios</button>
+                <button onClick={() => handleNav('/jobs')} className={`hover:text-white transition-colors ${location.pathname === '/jobs' ? 'text-white' : ''}`}>Careers</button>
+                <button onClick={() => handleNav('/', '#contacto')} className="text-white bg-white/10 px-6 py-2 rounded-full border border-white/10 hover:bg-white hover:text-black transition-all">Match</button>
+              </nav>
+
+              <button className="md:hidden p-2 text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
+          </motion.div>
         </div>
       </header>
 
@@ -82,12 +110,12 @@ const Header = () => {
 };
 
 const Footer = () => (
-  <footer className="py-24 px-6 border-t border-white/5 relative z-10 bg-black text-white">
+  <footer className="py-24 px-6 relative z-10 bg-black text-white liquid-footer">
     <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-16">
       <div className="md:col-span-2 space-y-6 text-center md:text-left">
         <div className="flex items-center justify-center md:justify-start gap-2">
           <span className="text-2xl font-extrabold tracking-tighter text-white">VALEUM</span>
-          <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.8)]"></div>
         </div>
         <p className="text-gray-500 max-w-sm text-sm leading-relaxed">
           AI-First Growth Partner. Transformamos data cruda en revenue predecible y escalable.
@@ -95,26 +123,27 @@ const Footer = () => (
       </div>
       <div className="space-y-6 text-center md:text-left">
         <h5 className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Navegación</h5>
-        <ul className="space-y-3 text-sm text-gray-500">
-          <li><Link to="/#servicios" className="hover:text-white transition-colors">Servicios</Link></li>
-          <li><Link to="/jobs" className="hover:text-white transition-colors">Trabaja con nosotros</Link></li>
-          <li><Link to="/#contacto" className="hover:text-white transition-colors">Match</Link></li>
+        <ul className="space-y-4 text-sm text-gray-500">
+          <li><Link to="/#servicios" className="hover:text-blue-400 transition-colors duration-300">Servicios</Link></li>
+          <li><Link to="/jobs" className="hover:text-blue-400 transition-colors duration-300">Trabaja con nosotros</Link></li>
+          <li><Link to="/#contacto" className="hover:text-blue-400 transition-colors duration-300">Match</Link></li>
         </ul>
       </div>
       <div className="space-y-6 text-center md:text-left">
         <h5 className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Ecosistema</h5>
-        <ul className="space-y-3 text-sm text-gray-500">
-          <li className="hover:text-white transition-colors cursor-pointer">LinkedIn</li>
-          <li className="hover:text-white transition-colors cursor-pointer">Youtube</li>
-          <li className="hover:text-white transition-colors cursor-pointer">Instagram</li>
-          <li className="hover:text-white transition-colors cursor-pointer">Facebook</li>
-          <li className="hover:text-white transition-colors cursor-pointer">Podcast</li>
+        <ul className="space-y-4 text-sm text-gray-500">
+          <li className="hover:text-blue-400 transition-colors duration-300 cursor-pointer">LinkedIn</li>
+          <li className="hover:text-blue-400 transition-colors duration-300 cursor-pointer">Youtube</li>
+          <li className="hover:text-blue-400 transition-colors duration-300 cursor-pointer">Instagram</li>
+          <li className="hover:text-blue-400 transition-colors duration-300 cursor-pointer">Facebook</li>
+          <li className="hover:text-blue-400 transition-colors duration-300 cursor-pointer">Podcast</li>
         </ul>
       </div>
     </div>
-    <div className="max-w-7xl mx-auto mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-gray-600 uppercase tracking-widest font-medium">
-      <span>© {new Date().getFullYear()} Valeum. AI-First Growth Partner.</span>
-      <span>Science over Luck.</span>
+    <div className="max-w-7xl mx-auto mt-24 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-gray-600 uppercase tracking-widest font-medium">
+      <div className="liquid-divider w-full absolute left-0 right-0" />
+      <span className="pt-8">© {new Date().getFullYear()} Valeum. AI-First Growth Partner.</span>
+      <span className="pt-8">Science over Luck.</span>
     </div>
   </footer>
 );
@@ -125,19 +154,23 @@ export default function App() {
       <div className="min-h-screen bg-black text-white selection:bg-blue-500 selection:text-white">
         <ScrollToHash />
         
-        {/* Background decoration */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        {/* Background decoration - manchas difusas para que backdrop-filter distorsione */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" style={{
+          background: 'radial-gradient(circle at 20% 20%, rgba(0,120,255,0.12), transparent 40%), radial-gradient(circle at 80% 30%, rgba(140,0,255,0.08), transparent 35%), radial-gradient(circle at 50% 80%, rgba(0,60,160,0.06), transparent 40%)'
+        }}>
           <Routes>
             <Route path="/" element={
               <>
-                <div className="absolute top-[-15%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[160px] bg-animate bg-blue-600/10 transition-colors duration-1000"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[160px] bg-animate bg-purple-600/10 transition-colors duration-1000" style={{ animationDelay: '3s' }}></div>
+                <div className="absolute top-[-10%] left-[-5%] w-[45%] h-[45%] rounded-full blur-[120px] bg-blue-500/15 transition-colors duration-1000"></div>
+                <div className="absolute bottom-[-5%] right-[-5%] w-[35%] h-[35%] rounded-full blur-[120px] bg-purple-500/12 transition-colors duration-1000" style={{ animationDelay: '3s' }}></div>
+                <div className="absolute top-[40%] left-[50%] w-[25%] h-[25%] rounded-full blur-[100px] bg-cyan-500/6 transition-colors duration-1000" style={{ animationDelay: '5s' }}></div>
               </>
             } />
             <Route path="/jobs" element={
               <>
-                <div className="absolute top-[-15%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[160px] bg-animate bg-purple-600/10 transition-colors duration-1000"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[160px] bg-animate bg-blue-600/10 transition-colors duration-1000" style={{ animationDelay: '3s' }}></div>
+                <div className="absolute top-[-10%] left-[-5%] w-[45%] h-[45%] rounded-full blur-[120px] bg-purple-500/15 transition-colors duration-1000"></div>
+                <div className="absolute bottom-[-5%] right-[-5%] w-[35%] h-[35%] rounded-full blur-[120px] bg-blue-500/12 transition-colors duration-1000" style={{ animationDelay: '3s' }}></div>
+                <div className="absolute top-[40%] right-[30%] w-[25%] h-[25%] rounded-full blur-[100px] bg-cyan-500/6 transition-colors duration-1000" style={{ animationDelay: '5s' }}></div>
               </>
             } />
           </Routes>
@@ -153,6 +186,41 @@ export default function App() {
         </main>
 
         <Footer />
+
+        {/* SVG Filters globales para Liquid Glass */}
+        <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
+          <defs>
+            <filter id="liquid-distortion" x="-10%" y="-10%" width="120%" height="120%">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.015"
+                numOctaves="3"
+                seed="2"
+                result="turbulence"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="turbulence"
+                scale="6"
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+            <filter id="liquid-glow">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feColorMatrix
+                in="blur"
+                type="saturate"
+                values="3"
+                result="saturated"
+              />
+              <feMerge>
+                <feMergeNode in="saturated" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+        </svg>
 
         <style>{`
           @keyframes scroll {
