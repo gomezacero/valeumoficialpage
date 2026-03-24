@@ -42,14 +42,14 @@ export default function Home() {
   return (
     <div className="transition-page">
       {/* Hero Section */}
-      <section id="hero" className="relative pt-60 pb-32 px-6 overflow-hidden" style={{ backgroundColor: '#000b1a' }}>
+      <section id="hero" className="relative pt-60 pb-24 px-6 overflow-hidden" style={{ backgroundColor: '#000b1a' }}>
         {/* Wave Background WebGL (lazy loaded, fallback CSS en mobile) */}
         <Suspense fallback={<div className="absolute inset-0 valeum-hero-container" />}>
           <WaveBackground className="z-[1]" />
         </Suspense>
         {/* Overlay gradiente para transicion suave al siguiente bloque */}
         <div className="absolute inset-0 z-[2] pointer-events-none" style={{
-          background: 'linear-gradient(to bottom, transparent 50%, #000b1a 95%, #000 100%)'
+          background: 'linear-gradient(to bottom, transparent 40%, rgba(0,11,26,0.6) 70%, #000 100%)'
         }} />
         <div className="max-w-7xl mx-auto text-center hero-content-wrapper">
           <motion.div
@@ -96,44 +96,38 @@ export default function Home() {
               VER SERVICIOS
             </a>
           </motion.div>
-        </div>
-      </section>
 
-      {/* Authority Section - DATOS CLAVE */}
-      <section className="py-20 px-6 relative z-20">
-        {/* Halos difusos detras de las cards para que el glass distorsione algo */}
-        <div className="liquid-glow w-[500px] h-[500px] bg-blue-500/15 -left-[10%] top-[-10%]" />
-        <div className="liquid-glow w-[400px] h-[400px] bg-purple-500/12 -right-[5%] bottom-[-10%]" style={{ animationDelay: '4s' }} />
-        <div className="liquid-glow w-[300px] h-[300px] bg-cyan-500/8 left-[40%] top-[20%]" style={{ animationDelay: '6s' }} />
-        <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 relative z-10">
-          {[
-            { label: 'Inversión Gestionada', value: '+$50M', icon: <BarChart3 className="text-blue-500" /> },
-            { label: 'Incremento en ROAS', value: '3x', icon: <Activity className="text-emerald-500" /> },
-            { label: 'Optimización Algorítmica', value: '24/7', icon: <ShieldCheck className="text-purple-500" /> },
-            { label: 'Talento y Expertise', value: 'Top 1%', icon: <Target className="text-orange-500" /> }
-          ].map((stat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
-              whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="group liquid-glass noise-texture p-8 rounded-[28px]"
-            >
-              <div className="noise-layer rounded-[28px]" />
-              <div className="liquid-glass-content">
-                <div className="mb-4 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
-                  {stat.icon}
+          {/* Authority Stats - dentro del hero para evitar corte */}
+          <div className="mt-32 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 relative z-10">
+            {[
+              { label: 'Inversión Gestionada', value: '+$50M', icon: <BarChart3 className="text-blue-500" /> },
+              { label: 'Incremento en ROAS', value: '3x', icon: <Activity className="text-emerald-500" /> },
+              { label: 'Optimización Algorítmica', value: '24/7', icon: <ShieldCheck className="text-purple-500" /> },
+              { label: 'Talento y Expertise', value: 'Top 1%', icon: <Target className="text-orange-500" /> }
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
+                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="group liquid-glass noise-texture p-8 rounded-[28px]"
+              >
+                <div className="noise-layer rounded-[28px]" />
+                <div className="liquid-glass-content">
+                  <div className="mb-4 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+                    {stat.icon}
+                  </div>
+                  <div className="text-3xl md:text-5xl font-black mb-2 tracking-tighter text-white stat-glow">
+                    {stat.value}
+                  </div>
+                  <div className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">
+                    {stat.label}
+                  </div>
                 </div>
-                <div className="text-3xl md:text-5xl font-black mb-2 tracking-tighter text-white stat-glow">
-                  {stat.value}
-                </div>
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">
-                  {stat.label}
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
