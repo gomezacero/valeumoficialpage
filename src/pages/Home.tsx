@@ -230,8 +230,8 @@ export default function Home() {
               </div>
               <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Presupuesto Mensual de Inversión</label>
-                  <select required className="liquid-input w-full rounded-2xl px-6 py-5 text-sm appearance-none text-white">
-                    <option value="" disabled selected>Selecciona un rango</option>
+                  <select required defaultValue="" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm appearance-none text-white [&>option]:bg-[#0a0f1a] [&>option]:text-white">
+                    <option value="" disabled>Selecciona un rango</option>
                     <option value="10k-50k">$10k - $50k USD</option>
                     <option value="50k-100k">$50k - $100k USD</option>
                     <option value="100k+">$100k+ USD</option>

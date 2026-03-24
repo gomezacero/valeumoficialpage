@@ -42,8 +42,8 @@ export default function Jobs() {
             
             <div className="space-y-3">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Posición de Interés</label>
-              <select id="role-select" required className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors appearance-none">
-                <option value="" disabled selected>Selecciona un rol</option>
+              <select id="role-select" required defaultValue="" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors appearance-none [&>option]:bg-[#0a0f1a] [&>option]:text-white">
+                <option value="" disabled>Selecciona un rol</option>
                 <option value="ai-media-buyer">AI Media Buyer Senior</option>
                 <option value="creative-technologist">Creative Technologist</option>
                 <option value="automation-engineer">Automation Engineer</option>

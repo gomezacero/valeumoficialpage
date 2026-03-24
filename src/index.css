@@ -10,6 +10,8 @@
   --glass-blur: 24px;
 }
 
+@layer base {
+
 body {
   font-family: 'Inter', sans-serif;
   background-color: #000;
@@ -27,12 +29,6 @@ body {
 }
 
 /* ═══ Gorilla Glass Premium Effect ═══ */
-@property --border-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
 .gorilla-glass {
   background: linear-gradient(
     135deg,
@@ -168,6 +164,35 @@ body {
   border-radius: 10px;
 }
 
+} /* end @layer base */
+
+/* @property declarations must be in global scope */
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --shine-x {
+  syntax: "<percentage>";
+  initial-value: -100%;
+  inherits: false;
+}
+
+@property --shine-y {
+  syntax: "<percentage>";
+  initial-value: 0%;
+  inherits: false;
+}
+
+@property --liquid-hue {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@layer components {
+
 /* Futuristic Animated Fluid Background */
 .valeum-hero-container {
   position: relative;
@@ -219,24 +244,6 @@ body {
    Inspired by Apple's Liquid Glass (WWDC 2025)
    Layers: backdrop-filter + SVG filters + CSS animations
    ═══════════════════════════════════════════════════════════════ */
-
-@property --shine-x {
-  syntax: "<percentage>";
-  initial-value: -100%;
-  inherits: false;
-}
-
-@property --shine-y {
-  syntax: "<percentage>";
-  initial-value: 0%;
-  inherits: false;
-}
-
-@property --liquid-hue {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
 
 /* ── Liquid Glass Card Base ── */
 .liquid-glass {
@@ -623,3 +630,5 @@ body {
     transparent 100%
   );
 }
+
+} /* end @layer components */
