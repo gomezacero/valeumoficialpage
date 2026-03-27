@@ -62,9 +62,8 @@ const Header = () => {
           <motion.div
             ref={navRef}
             onMouseMove={handleMouseMove}
-            className={`gorilla-glass rounded-full px-8 py-3 transition-all duration-700 ${
-              scrolled ? 'gorilla-glass-scrolled' : ''
-            }`}
+            className={`gorilla-glass rounded-full px-8 py-3 transition-all duration-700 ${scrolled ? 'gorilla-glass-scrolled' : ''
+              }`}
             initial={false}
             animate={{
               borderColor: scrolled ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)',
@@ -77,8 +76,7 @@ const Header = () => {
             {/* Contenido del navbar */}
             <div className="gorilla-glass-content">
               <div className="flex items-center gap-2 group cursor-pointer" onClick={() => handleNav('/')}>
-                <span className="text-xl font-extrabold tracking-tighter text-white">VALEUM</span>
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                <img src="/valeum-logo.png" alt="Valeum" className="h-5 w-auto object-contain" />
               </div>
 
               <nav className="hidden md:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
@@ -114,8 +112,7 @@ const Footer = () => (
     <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-16">
       <div className="md:col-span-2 space-y-6 text-center md:text-left">
         <div className="flex items-center justify-center md:justify-start gap-2">
-          <span className="text-2xl font-extrabold tracking-tighter text-white">VALEUM</span>
-          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.8)]"></div>
+          <img src="/valeum-logo.png" alt="Valeum" className="h-9 w-auto object-contain" />
         </div>
         <p className="text-gray-500 max-w-sm text-sm leading-relaxed">
           AI-First Growth Partner. Transformamos data cruda en revenue predecible y escalable.
@@ -153,7 +150,7 @@ export default function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-black text-white selection:bg-blue-500 selection:text-white">
         <ScrollToHash />
-        
+
         {/* Background decoration - manchas difusas para que backdrop-filter distorsione */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" style={{
           background: 'radial-gradient(circle at 20% 20%, rgba(0,120,255,0.12), transparent 40%), radial-gradient(circle at 80% 30%, rgba(140,0,255,0.08), transparent 35%), radial-gradient(circle at 50% 80%, rgba(0,60,160,0.06), transparent 40%)'
