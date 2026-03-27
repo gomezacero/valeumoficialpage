@@ -1,9 +1,52 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Menu, X, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import Home from "./pages/Home";
 import Jobs from "./pages/Jobs";
+
+// Toast Context
+type ToastType = 'success' | 'error' | 'info';
+interface ToastContextType {
+  showToast: (message: string, type?: ToastType) => void;
+}
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
+
+export const useToast = () => {
+  const context = useContext(ToastContext);
+  if (!context) throw new Error('useToast must be used within ToastProvider');
+  return context;
+};
+
+const Toast = ({ message, type = 'success', onClose }: { message: string, type?: ToastType, onClose: () => void }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 5000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const icons = {
+    success: <CheckCircle2 className="text-emerald-400" size={18} />,
+    error: <AlertCircle className="text-red-400" size={18} />,
+    info: <Info className="text-blue-400" size={18} />
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50, scale: 0.95, filter: 'blur(8px)' }}
+      animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+      exit={{ opacity: 0, y: 20, scale: 0.95, filter: 'blur(8px)' }}
+      className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] min-w-[320px]"
+    >
+      <div className="gorilla-glass px-6 py-4 flex items-center gap-4 border border-white/10 shadow-2xl">
+        <div className="flex-shrink-0">{icons[type]}</div>
+        <p className="text-sm font-medium text-white/90">{message}</p>
+        <button onClick={onClose} className="ml-auto text-white/40 hover:text-white transition-colors">
+          <X size={16} />
+        </button>
+      </div>
+    </motion.div>
+  );
+};
 
 const ScrollToHash = () => {
   const { pathname, hash } = useLocation();
@@ -146,86 +189,105 @@ const Footer = () => (
 );
 
 export default function App() {
+  const [toast, setToast] = useState<{ message: string, type: ToastType } | null>(null);
+
+  const showToast = useCallback((message: string, type: ToastType = 'success') => {
+    setToast({ message, type });
+  }, []);
+
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-black text-white selection:bg-blue-500 selection:text-white">
-        <ScrollToHash />
+    <ToastContext.Provider value={{ showToast }}>
+      <BrowserRouter>
+        <div className="min-h-screen bg-black text-white selection:bg-blue-500 selection:text-white">
+          <ScrollToHash />
 
-        {/* Background decoration - manchas difusas para que backdrop-filter distorsione */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" style={{
-          background: 'radial-gradient(circle at 20% 20%, rgba(0,120,255,0.12), transparent 40%), radial-gradient(circle at 80% 30%, rgba(140,0,255,0.08), transparent 35%), radial-gradient(circle at 50% 80%, rgba(0,60,160,0.06), transparent 40%)'
-        }}>
-          <Routes>
-            <Route path="/" element={
-              <>
-                <div className="absolute top-[-10%] left-[-5%] w-[45%] h-[45%] rounded-full blur-[120px] bg-blue-500/15 transition-colors duration-1000"></div>
-                <div className="absolute bottom-[-5%] right-[-5%] w-[35%] h-[35%] rounded-full blur-[120px] bg-purple-500/12 transition-colors duration-1000" style={{ animationDelay: '3s' }}></div>
-                <div className="absolute top-[40%] left-[50%] w-[25%] h-[25%] rounded-full blur-[100px] bg-cyan-500/6 transition-colors duration-1000" style={{ animationDelay: '5s' }}></div>
-              </>
-            } />
-            <Route path="/jobs" element={
-              <>
-                <div className="absolute top-[-10%] left-[-5%] w-[45%] h-[45%] rounded-full blur-[120px] bg-purple-500/15 transition-colors duration-1000"></div>
-                <div className="absolute bottom-[-5%] right-[-5%] w-[35%] h-[35%] rounded-full blur-[120px] bg-blue-500/12 transition-colors duration-1000" style={{ animationDelay: '3s' }}></div>
-                <div className="absolute top-[40%] right-[30%] w-[25%] h-[25%] rounded-full blur-[100px] bg-cyan-500/6 transition-colors duration-1000" style={{ animationDelay: '5s' }}></div>
-              </>
-            } />
-          </Routes>
-        </div>
+          {/* Background decoration - manchas difusas para que backdrop-filter distorsione */}
+          <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" style={{
+            background: 'radial-gradient(circle at 20% 20%, rgba(0,120,255,0.12), transparent 40%), radial-gradient(circle at 80% 30%, rgba(140,0,255,0.08), transparent 35%), radial-gradient(circle at 50% 80%, rgba(0,60,160,0.06), transparent 40%)'
+          }}>
+            <Routes>
+              <Route path="/" element={
+                <>
+                  <div className="absolute top-[-10%] left-[-5%] w-[45%] h-[45%] rounded-full blur-[120px] bg-blue-500/15 transition-colors duration-1000"></div>
+                  <div className="absolute bottom-[-5%] right-[-5%] w-[35%] h-[35%] rounded-full blur-[120px] bg-purple-500/12 transition-colors duration-1000" style={{ animationDelay: '3s' }}></div>
+                  <div className="absolute top-[40%] left-[50%] w-[25%] h-[25%] rounded-full blur-[100px] bg-cyan-500/6 transition-colors duration-1000" style={{ animationDelay: '5s' }}></div>
+                </>
+              } />
+              <Route path="/jobs" element={
+                <>
+                  <div className="absolute top-[-10%] left-[-5%] w-[45%] h-[45%] rounded-full blur-[120px] bg-purple-500/15 transition-colors duration-1000"></div>
+                  <div className="absolute bottom-[-5%] right-[-5%] w-[35%] h-[35%] rounded-full blur-[120px] bg-blue-500/12 transition-colors duration-1000" style={{ animationDelay: '3s' }}></div>
+                  <div className="absolute top-[40%] right-[30%] w-[25%] h-[25%] rounded-full blur-[100px] bg-cyan-500/6 transition-colors duration-1000" style={{ animationDelay: '5s' }}></div>
+                </>
+              } />
+            </Routes>
+          </div>
 
-        <Header />
+          <Header />
 
-        <main className="relative z-10">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/jobs" element={<Jobs />} />
-          </Routes>
-        </main>
+          <main className="relative z-10">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/jobs" element={<Jobs />} />
+            </Routes>
+          </main>
 
-        <Footer />
+          <Footer />
 
-        {/* SVG Filters globales para Liquid Glass */}
-        <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
-          <defs>
-            <filter id="liquid-distortion" x="-10%" y="-10%" width="120%" height="120%">
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.015"
-                numOctaves="3"
-                seed="2"
-                result="turbulence"
+          <AnimatePresence>
+            {toast && (
+              <Toast
+                key="toast"
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast(null)}
               />
-              <feDisplacementMap
-                in="SourceGraphic"
-                in2="turbulence"
-                scale="6"
-                xChannelSelector="R"
-                yChannelSelector="G"
-              />
-            </filter>
-            <filter id="liquid-glow">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feColorMatrix
-                in="blur"
-                type="saturate"
-                values="3"
-                result="saturated"
-              />
-              <feMerge>
-                <feMergeNode in="saturated" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-        </svg>
+            )}
+          </AnimatePresence>
 
-        <style>{`
+          {/* SVG Filters globales para Liquid Glass */}
+          <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
+            <defs>
+              <filter id="liquid-distortion" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.015"
+                  numOctaves="3"
+                  seed="2"
+                  result="turbulence"
+                />
+                <feDisplacementMap
+                  in="SourceGraphic"
+                  in2="turbulence"
+                  scale="6"
+                  xChannelSelector="R"
+                  yChannelSelector="G"
+                />
+              </filter>
+              <filter id="liquid-glow">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feColorMatrix
+                  in="blur"
+                  type="saturate"
+                  values="3"
+                  result="saturated"
+                />
+                <feMerge>
+                  <feMergeNode in="saturated" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+          </svg>
+
+          <style>{`
           @keyframes scroll {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
           }
         `}</style>
-      </div>
-    </BrowserRouter>
+        </div>
+      </BrowserRouter>
+    </ToastContext.Provider>
   );
 }

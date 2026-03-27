@@ -1,14 +1,41 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { ArrowRight, Globe, Sparkles, BarChart3, Activity, ShieldCheck, Target, Layers, Zap, Cpu, Code, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useToast } from '../App';
 
 const WaveBackground = lazy(() => import('../components/WaveBackground'));
 
 export default function Home() {
-  const handleMatchSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
+
+  const handleMatchSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert('Solicitud de Match enviada. Nos pondremos en contacto en 24 horas.');
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    
+    try {
+      await addDoc(collection(db, "match_requests"), {
+        name: formData.get("name"),
+        company: formData.get("company"),
+        budget: formData.get("budget"),
+        challenge: formData.get("challenge"),
+        createdAt: new Date()
+      });
+      showToast('Solicitud de Match enviada. Nos pondremos en contacto en 24 horas.');
+      form.reset();
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+      showToast("Hubo un error al enviar la solicitud. Por favor, inténtalo de nuevo.", 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const services = [
@@ -221,16 +248,16 @@ export default function Home() {
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Nombre Completo</label>
-                  <input type="text" placeholder="Tu nombre" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required />
+                  <input name="name" type="text" placeholder="Tu nombre" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required />
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Empresa / URL</label>
-                  <input type="text" placeholder="tudominio.com" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required />
+                  <input name="company" type="text" placeholder="tudominio.com" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required />
                 </div>
               </div>
               <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Presupuesto Mensual de Inversión</label>
-                  <select required defaultValue="" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm appearance-none text-white [&>option]:bg-[#0a0f1a] [&>option]:text-white">
+                  <select name="budget" required defaultValue="" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm appearance-none text-white [&>option]:bg-[#0a0f1a] [&>option]:text-white">
                     <option value="" disabled>Selecciona un rango</option>
                     <option value="10k-50k">$10k - $50k USD</option>
                     <option value="50k-100k">$50k - $100k USD</option>
@@ -239,10 +266,10 @@ export default function Home() {
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Tu Desafío Principal</label>
-                <textarea rows={4} placeholder="¿Qué te impide escalar hoy? Sé directo y específico." className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required></textarea>
+                <textarea name="challenge" rows={4} placeholder="¿Qué te impide escalar hoy? Sé directo y específico." className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required></textarea>
               </div>
-              <button type="submit" className="liquid-button w-full py-6 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] uppercase tracking-[0.2em] text-xs">
-                Enviar Solicitud de Match
+              <button disabled={isSubmitting} type="submit" className="liquid-button w-full py-6 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black rounded-2xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] uppercase tracking-[0.2em] text-xs">
+                {isSubmitting ? 'ENVIANDO...' : 'Enviar Solicitud de Match'}
               </button>
               <p className="text-xs text-gray-500 text-center font-medium">Revisamos todas las solicitudes en 24 horas. Si hay fit, agendamos una llamada de 15 minutos.</p>
             </div>

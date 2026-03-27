@@ -1,10 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Users } from 'lucide-react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useToast } from '../App';
 
 export default function Jobs() {
-  const handleJobSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
+
+  const handleJobSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert('Aplicación enviada al sistema de selección.');
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      await addDoc(collection(db, "job_applications"), {
+        name: formData.get("name"),
+        email: formData.get("email"),
+        role: formData.get("role"),
+        linkedin: formData.get("linkedin"),
+        reason: formData.get("reason"),
+        createdAt: new Date()
+      });
+      showToast('Aplicación enviada al sistema de selección.');
+      form.reset();
+    } catch (error) {
+      console.error("Error al enviar la aplicación:", error);
+      showToast("Hubo un error al enviar tu aplicación. Por favor, inténtalo de nuevo.", 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -32,17 +60,17 @@ export default function Jobs() {
             <div className="grid md:grid-cols-2 gap-8">
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Nombre Completo</label>
-                <input type="text" placeholder="Tu nombre" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors" required />
+                <input name="name" type="text" placeholder="Tu nombre" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors" required />
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Correo Electrónico</label>
-                <input type="email" placeholder="tu@email.com" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors" required />
+                <input name="email" type="email" placeholder="tu@email.com" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors" required />
               </div>
             </div>
             
             <div className="space-y-3">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Posición de Interés</label>
-              <select id="role-select" required defaultValue="" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors appearance-none [&>option]:bg-[#0a0f1a] [&>option]:text-white">
+              <select id="role-select" name="role" required defaultValue="" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors appearance-none [&>option]:bg-[#0a0f1a] [&>option]:text-white">
                 <option value="" disabled>Selecciona un rol</option>
                 <option value="ai-media-buyer">AI Media Buyer Senior</option>
                 <option value="creative-technologist">Creative Technologist</option>
@@ -53,15 +81,17 @@ export default function Jobs() {
             
             <div className="space-y-3">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">LinkedIn / Portfolio URL</label>
-              <input type="url" placeholder="https://" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors" required />
+              <input name="linkedin" type="url" placeholder="https://" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors" required />
             </div>
 
             <div className="space-y-3">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">¿Por qué Valeum?</label>
-              <textarea rows={4} placeholder="Cuéntanos por qué eres un talento atípico y qué aportarías al equipo." className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors" required></textarea>
+              <textarea name="reason" rows={4} placeholder="Cuéntanos por qué eres un talento atípico y qué aportarías al equipo." className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-purple-500 text-sm text-white transition-colors" required></textarea>
             </div>
 
-            <button type="submit" className="w-full py-6 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-2xl transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] uppercase tracking-[0.2em] text-xs">ENVIAR APLICACIÓN</button>
+            <button disabled={isSubmitting} type="submit" className="w-full py-6 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black rounded-2xl transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] uppercase tracking-[0.2em] text-xs">
+              {isSubmitting ? 'ENVIANDO...' : 'ENVIAR APLICACIÓN'}
+            </button>
           </form>
         </div>
       </div>
