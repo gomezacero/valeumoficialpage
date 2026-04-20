@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helpers
+    function isString(v, maxLen) {
+      return v is string && v.size() > 0 && v.size() <= maxLen;
+    }
+    function hasTimestamp() {
+      return request.resource.data.createdAt == request.time;
+    }
+
+    // Solicitudes de Match (formulario Home)
+    match /match_requests/{docId} {
+      allow read, update, delete: if false;
+      allow create: if
+        request.resource.data.keys().hasOnly(['name','company','budget','challenge','createdAt'])
+        && isString(request.resource.data.name, 120)
+        && isString(request.resource.data.company, 200)
+        && request.resource.data.budget in ['10k-50k','50k-100k','100k+']
+        && isString(request.resource.data.challenge, 2000)
+        && hasTimestamp();
+    }
+
+    // Aplicaciones a vacantes (formulario Jobs)
+    match /job_applications/{docId} {
+      allow read, update, delete: if false;
+      allow create: if
+        request.resource.data.keys().hasOnly(['name','email','role','linkedin','reason','createdAt'])
+        && isString(request.resource.data.name, 120)
+        && isString(request.resource.data.email, 200)
+        && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && request.resource.data.role in ['ai-media-buyer','creative-technologist','automation-engineer','other']
+        && isString(request.resource.data.linkedin, 500)
+        && isString(request.resource.data.reason, 2000)
+        && hasTimestamp();
+    }
+
+    // Denegar todo lo demás por defecto
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

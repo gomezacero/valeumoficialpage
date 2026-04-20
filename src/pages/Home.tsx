@@ -1,12 +1,15 @@
 import React, { lazy, Suspense, useState } from 'react';
 import { ArrowRight, Globe, Sparkles, BarChart3, Activity, ShieldCheck, Target, Layers, Zap, Cpu, Code, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { addFirestoreDoc, logAnalyticsEvent } from '../firebase';
 import { useToast } from '../App';
 
 const WaveBackground = lazy(() => import('../components/WaveBackground'));
+
+const ALLOWED_BUDGETS = new Set(['10k-50k', '50k-100k', '100k+']);
+const MAX_NAME = 120;
+const MAX_COMPANY = 200;
+const MAX_CHALLENGE = 2000;
 
 export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -15,24 +18,38 @@ export default function Home() {
   const handleMatchSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSubmitting) return;
-    
-    setIsSubmitting(true);
+
     const form = e.currentTarget;
     const formData = new FormData(form);
-    
+
+    const name = String(formData.get('name') ?? '').trim();
+    const company = String(formData.get('company') ?? '').trim();
+    const budget = String(formData.get('budget') ?? '').trim();
+    const challenge = String(formData.get('challenge') ?? '').trim();
+
+    if (!name || !company || !challenge) {
+      showToast('Por favor completa todos los campos requeridos.', 'error');
+      return;
+    }
+    if (name.length > MAX_NAME || company.length > MAX_COMPANY || challenge.length > MAX_CHALLENGE) {
+      showToast('Alguno de los campos excede el límite permitido.', 'error');
+      return;
+    }
+    if (!ALLOWED_BUDGETS.has(budget)) {
+      showToast('Selecciona un rango de presupuesto válido.', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      await addDoc(collection(db, "match_requests"), {
-        name: formData.get("name"),
-        company: formData.get("company"),
-        budget: formData.get("budget"),
-        challenge: formData.get("challenge"),
-        createdAt: new Date()
-      });
+      await addFirestoreDoc('match_requests', { name, company, budget, challenge });
       showToast('Solicitud de Match enviada. Nos pondremos en contacto en 24 horas.');
       form.reset();
+      void logAnalyticsEvent('form_submit', { form_name: 'match_request' });
     } catch (error) {
-      console.error("Error al enviar la solicitud:", error);
-      showToast("Hubo un error al enviar la solicitud. Por favor, inténtalo de nuevo.", 'error');
+      if (import.meta.env.DEV) console.error('Error al enviar la solicitud:', error);
+      showToast('Hubo un error al enviar la solicitud. Por favor, inténtalo de nuevo.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -248,11 +265,11 @@ export default function Home() {
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Nombre Completo</label>
-                  <input name="name" type="text" placeholder="Tu nombre" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required />
+                  <input name="name" type="text" placeholder="Tu nombre" maxLength={MAX_NAME} autoComplete="name" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required />
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Empresa / URL</label>
-                  <input name="company" type="text" placeholder="tudominio.com" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required />
+                  <input name="company" type="text" placeholder="tudominio.com" maxLength={MAX_COMPANY} autoComplete="organization" className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required />
                 </div>
               </div>
               <div className="space-y-3">
@@ -266,7 +283,7 @@ export default function Home() {
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Tu Desafío Principal</label>
-                <textarea name="challenge" rows={4} placeholder="¿Qué te impide escalar hoy? Sé directo y específico." className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required></textarea>
+                <textarea name="challenge" rows={4} maxLength={MAX_CHALLENGE} placeholder="¿Qué te impide escalar hoy? Sé directo y específico." className="liquid-input w-full rounded-2xl px-6 py-5 text-sm text-white" required></textarea>
               </div>
               <button disabled={isSubmitting} type="submit" className="liquid-button w-full py-6 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black rounded-2xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] uppercase tracking-[0.2em] text-xs">
                 {isSubmitting ? 'ENVIANDO...' : 'Enviar Solicitud de Match'}

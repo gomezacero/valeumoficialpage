@@ -121,18 +121,29 @@ interface WaveBackgroundProps {
   className?: string;
 }
 
+function getInitialUseFallback() {
+  if (typeof window === 'undefined') return true;
+  if (window.innerWidth < 768) return true;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return true;
+  return false;
+}
+
 export default function WaveBackground({ className = '' }: WaveBackgroundProps) {
-  const [isMobile, setIsMobile] = useState(false);
+  const [useFallback, setUseFallback] = useState(getInitialUseFallback);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+    const mqMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const check = () => setUseFallback(window.innerWidth < 768 || mqMotion.matches);
+    window.addEventListener('resize', check, { passive: true });
+    mqMotion.addEventListener?.('change', check);
+    return () => {
+      window.removeEventListener('resize', check);
+      mqMotion.removeEventListener?.('change', check);
+    };
   }, []);
 
-  // En mobile, usar fallback CSS (no cargar Three.js canvas)
-  if (isMobile) {
+  // En mobile o prefers-reduced-motion, usar fallback CSS (no cargar Three.js canvas)
+  if (useFallback) {
     return <div className={`valeum-hero-container absolute inset-0 ${className}`} />;
   }
 
@@ -142,7 +153,8 @@ export default function WaveBackground({ className = '' }: WaveBackgroundProps) 
         dpr={[1, 1.5]}
         camera={{ position: [0, 1.8, 2.5], fov: 50 }}
         style={{ background: 'transparent' }}
-        gl={{ alpha: true, antialias: true }}
+        gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
+        frameloop="always"
       >
         <WaveMesh />
       </Canvas>

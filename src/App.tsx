@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
+import React, { useState, useEffect, useRef, useCallback, createContext, useContext, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Home from "./pages/Home";
-import Jobs from "./pages/Jobs";
+import { initAnalyticsLazy } from "./firebase";
+
+const Jobs = lazy(() => import("./pages/Jobs"));
 
 // Toast Context
 type ToastType = 'success' | 'error' | 'info';
@@ -72,8 +74,16 @@ const Header = () => {
   const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 50);
+        ticking = false;
+      });
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -119,7 +129,7 @@ const Header = () => {
             {/* Contenido del navbar */}
             <div className="gorilla-glass-content">
               <div className="flex items-center gap-2 group cursor-pointer" onClick={() => handleNav('/')}>
-                <img src="/valeum-logo.png" alt="Valeum" className="h-5 w-auto object-contain" />
+                <img src="/valeum-logo.png" alt="Valeum" width="90" height="20" className="h-5 w-auto object-contain" />
               </div>
 
               <nav className="hidden md:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
@@ -128,7 +138,7 @@ const Header = () => {
                 <button onClick={() => handleNav('/', '#contacto')} className="text-white bg-white/10 px-6 py-2 rounded-full border border-white/10 hover:bg-white hover:text-black transition-all">Match</button>
               </nav>
 
-              <button className="md:hidden p-2 text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              <button className="md:hidden p-2 text-white" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Abrir menú">
                 {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
@@ -143,7 +153,7 @@ const Header = () => {
             <button onClick={() => handleNav('/jobs')} className="text-left hover:text-purple-500 transition-colors">Careers</button>
             <button onClick={() => handleNav('/', '#contacto')} className="text-left text-blue-500 underline underline-offset-8">Match</button>
           </div>
-          <button className="absolute top-8 right-6 p-2 text-white" onClick={() => setIsMenuOpen(false)}><X size={32} /></button>
+          <button className="absolute top-8 right-6 p-2 text-white" onClick={() => setIsMenuOpen(false)} aria-label="Cerrar menú"><X size={32} /></button>
         </div>
       )}
     </>
@@ -155,7 +165,7 @@ const Footer = () => (
     <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-16">
       <div className="md:col-span-2 space-y-6 text-center md:text-left">
         <div className="flex items-center justify-center md:justify-start gap-2">
-          <img src="/valeum-logo.png" alt="Valeum" className="h-9 w-auto object-contain" />
+          <img src="/valeum-logo.png" alt="Valeum" width="160" height="36" className="h-9 w-auto object-contain" />
         </div>
         <p className="text-gray-500 max-w-sm text-sm leading-relaxed">
           AI-First Growth Partner. Transformamos data cruda en revenue predecible y escalable.
@@ -195,6 +205,10 @@ export default function App() {
     setToast({ message, type });
   }, []);
 
+  useEffect(() => {
+    initAnalyticsLazy();
+  }, []);
+
   return (
     <ToastContext.Provider value={{ showToast }}>
       <BrowserRouter>
@@ -226,10 +240,12 @@ export default function App() {
           <Header />
 
           <main className="relative z-10">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/jobs" element={<Jobs />} />
-            </Routes>
+            <Suspense fallback={<div className="min-h-screen" aria-hidden="true" />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/jobs" element={<Jobs />} />
+              </Routes>
+            </Suspense>
           </main>
 
           <Footer />
@@ -244,48 +260,6 @@ export default function App() {
               />
             )}
           </AnimatePresence>
-
-          {/* SVG Filters globales para Liquid Glass */}
-          <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
-            <defs>
-              <filter id="liquid-distortion" x="-10%" y="-10%" width="120%" height="120%">
-                <feTurbulence
-                  type="fractalNoise"
-                  baseFrequency="0.015"
-                  numOctaves="3"
-                  seed="2"
-                  result="turbulence"
-                />
-                <feDisplacementMap
-                  in="SourceGraphic"
-                  in2="turbulence"
-                  scale="6"
-                  xChannelSelector="R"
-                  yChannelSelector="G"
-                />
-              </filter>
-              <filter id="liquid-glow">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feColorMatrix
-                  in="blur"
-                  type="saturate"
-                  values="3"
-                  result="saturated"
-                />
-                <feMerge>
-                  <feMergeNode in="saturated" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-          </svg>
-
-          <style>{`
-          @keyframes scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-        `}</style>
         </div>
       </BrowserRouter>
     </ToastContext.Provider>
