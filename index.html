@@ -1,27 +1,437 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#000b1a" />
-    <title>Valeum | AI-First Growth Partner</title>
-    <meta name="description" content="AI-First Growth Partner. Transformamos data cruda en revenue predecible y escalable." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate icon" type="image/png" sizes="192x192" href="/favicon-square.png" />
-    <link rel="apple-touch-icon" href="/favicon-square.png" />
-    <meta property="og:title" content="Valeum | AI-First Growth Partner" />
-    <meta property="og:description" content="AI-First Growth Partner. Transformamos data cruda en revenue predecible y escalable." />
-    <meta property="og:image" content="/valeum-logo.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800;900&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Valeum | AI Hub · Marketing Performance, Consultoría y Software a Medida</title>
+<meta name="description" content="Valeum es un AI hub: marketing performance, consultoría estratégica y software a medida, todo construido con IA y sistemas de agentes a escala para generar valor real.">
+<meta name="theme-color" content="#FAF9F6">
+<meta property="og:title" content="Valeum: creamos sistemas agénticos de IA que ayudan a escalar tu negocio">
+<meta property="og:description" content="AI hub: marketing performance, consultoría y software a medida, construidos con IA y sistemas de agentes a escala.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/valeum-logo.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="alternate icon" type="image/png" sizes="192x192" href="/favicon-square.png">
+<link rel="apple-touch-icon" href="/favicon-square.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500..800&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400..600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="logo" aria-label="Valeum — inicio"><img class="logo-img" src="data:image/png;base64,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" alt="Valeum"></a>
+    <nav class="nav-links" aria-label="Principal">
+      <a href="#que-hacemos" data-i18n="nav.what">Qué hacemos</a>
+      <a href="#productos" data-i18n="nav.products">Productos</a>
+      <a href="#consultoria" data-i18n="nav.consulting">Consultoría</a>
+      <a href="#agenda" data-i18n="nav.agenda">Agenda</a>
+    </nav>
+    <div class="nav-right">
+      <div class="lang" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="es" class="active">ES</button>
+        <button type="button" data-lang="pt">PT</button>
+      </div>
+      <a href="#agenda" class="btn btn-primary btn-sm magnetic" data-i18n="nav.cta">Agenda una llamada</a>
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#que-hacemos"><span data-i18n="nav.what">Qué hacemos</span><span class="mi">01</span></a>
+  <a href="#productos"><span data-i18n="nav.products">Productos</span><span class="mi">02</span></a>
+  <a href="#consultoria"><span data-i18n="nav.consulting">Consultoría</span><span class="mi">03</span></a>
+  <a href="#agenda"><span data-i18n="nav.agenda">Agenda</span><span class="mi">04</span></a>
+  <a href="#agenda" class="btn btn-primary"><span data-i18n="nav.cta">Agenda una llamada</span></a>
+</div>
+
+<main id="top">
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="hero-badge hload hload-1">
+      <span class="pulse" aria-hidden="true"></span>
+      <span data-i18n="hero.badge">AI Hub · Marketing · Software · Consultoría</span>
+    </div>
+    <h1 class="hload hload-2">
+      <span data-i18n="hero.t1">Creamos sistemas agénticos de IA que ayudan a escalar tu</span>
+      <span class="accent" data-i18n="hero.t2">negocio</span><span data-i18n="hero.t3">.</span>
+    </h1>
+    <p class="hero-sub hload hload-3" data-i18n="hero.sub">Valeum es un AI hub: marketing performance, consultoría estratégica y software a medida, integrados de punta a punta para generar valor real.</p>
+    <div class="hero-ctas hload hload-4">
+      <a href="#agenda" class="btn btn-primary magnetic">
+        <span data-i18n="hero.cta1">Agenda una llamada</span>
+        <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="#que-hacemos" class="btn btn-ghost magnetic" data-i18n="hero.cta2">Ver lo que hacemos</a>
+    </div>
+
+    <div class="stats-grid hero-stats" id="statsGrid">
+      <div class="stat rv">
+        <div class="stat-num" data-odo="20" data-prefix="+$" data-suffix="M" aria-label="+20 millones USD">+$0M</div>
+        <div class="stat-label" data-i18n="stats.k1">USD invertidos en publicidad, experiencia real acumulada</div>
+      </div>
+      <div class="stat rv rv-d1">
+        <div class="stat-num" data-odo="20" data-prefix="+">+0</div>
+        <div class="stat-label" data-i18n="stats.k2">países donde escalamos campañas</div>
+      </div>
+      <div class="stat rv rv-d2">
+        <div class="stat-num" data-odo="20" data-suffix="x" aria-label="20 veces más rápido">0x</div>
+        <div class="stat-label" data-i18n="stats.k3">más rápido: creamos tecnología que acelera procesos sin sacrificar calidad</div>
+      </div>
+      <div class="stat rv rv-d3">
+        <div class="stat-num" data-odo="10" aria-label="10 industrias">0</div>
+        <div class="stat-label" data-i18n="stats.k4">industrias en las que operamos actualmente</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="stats" id="stats" aria-label="Industrias">
+  <div class="wrap">
+    <div class="ind-title rv" data-i18n="stats.ind">Industrias en las que operamos</div>
+    <div class="ind-marquee rv">
+      <div class="ind-track" id="marqueeTrack"><span class="ind-item" data-i18n="stats.i1">Petróleo & Gas</span><i class="ind-dot" aria-hidden="true"></i><span class="ind-item" data-i18n="stats.i2">Advertising</span><i class="ind-dot" aria-hidden="true"></i><span class="ind-item" data-i18n="stats.i3">E-commerce</span><i class="ind-dot" aria-hidden="true"></i><span class="ind-item" data-i18n="stats.i4">Marca personal</span><i class="ind-dot" aria-hidden="true"></i><span class="ind-item" data-i18n="stats.i5">Automotriz</span><i class="ind-dot" aria-hidden="true"></i><span class="ind-item" data-i18n="stats.i6">Educación</span><i class="ind-dot" aria-hidden="true"></i><span class="ind-item" data-i18n="stats.i7">Real estate</span><i class="ind-dot" aria-hidden="true"></i><span class="ind-item" data-i18n="stats.i8">Finanzas</span><i class="ind-dot" aria-hidden="true"></i></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUÉ HACEMOS (bento) ============ -->
+<section id="que-hacemos">
+  <div class="wrap">
+    <span class="eyebrow rv" data-i18n="what.label">Qué hacemos</span>
+    <h2 class="sec-title rv rv-d1"><span data-i18n="what.t1">Un solo hub.</span> <span class="accent" data-i18n="what.t2">Todo el sistema.</span></h2>
+    <p class="sec-sub rv rv-d2" data-i18n="what.sub">Cuatro líneas de valor que trabajan como una sola: lo que lanzamos en marketing lo mide el software, lo que mide el software lo mejora la consultoría.</p>
+
+    <div class="bento">
+      <!-- Marketing performance -->
+      <article class="bcard b-7 rv">
+        <h3 data-i18n="what.c1.t">Marketing performance</h3>
+        <p data-i18n="what.c1.d">Lanzamos y gestionamos campañas a escala en Meta, TikTok, Google y RSOC, con optimización asistida por IA.</p>
+        <div class="b-ui" aria-hidden="true">
+          <div class="mini-profit">
+            <div class="mini-profit-head"><span data-i18n="what.c1.chart">Profit mensual</span><b>+186%</b></div>
+            <div class="growth">
+              <svg viewBox="0 0 440 130" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="pfill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#FF4D00" stop-opacity=".2"/>
+                    <stop offset="1" stop-color="#FF4D00" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <line class="g-grid" x1="0" y1="96" x2="440" y2="96"/>
+                <line class="g-grid" x1="0" y1="58" x2="440" y2="58"/>
+                <line class="g-grid" x1="0" y1="20" x2="440" y2="20"/>
+                <path class="g-area" fill="url(#pfill)" d="M0,114 C50,108 80,102 120,92 C160,82 190,80 230,64 C270,48 300,44 345,28 C385,14 415,10 440,6 L440,130 L0,130 Z"/>
+                <path class="g-line" d="M0,114 C50,108 80,102 120,92 C160,82 190,80 230,64 C270,48 300,44 345,28 C385,14 415,10 440,6"/>
+                <circle class="g-dot" cx="440" cy="6" r="4"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Consultoría -->
+      <article class="bcard b-5 rv rv-d1">
+        <h3 data-i18n="what.c2.t">Consultoría estratégica</h3>
+        <p data-i18n="what.c2.d">Diagnóstico, roadmap y acompañamiento: decisiones de growth con datos, no con intuición.</p>
+        <div class="b-ui" aria-hidden="true">
+          <div class="mini-road">
+            <div class="mstep done"><span class="ms-t" data-i18n="what.c2.s1">Diagnóstico</span><span class="ms-tag">OK</span></div>
+            <div class="mstep done"><span class="ms-t" data-i18n="what.c2.s2">Roadmap</span><span class="ms-tag">OK</span></div>
+            <div class="mstep now"><span class="ms-t" data-i18n="what.c2.s3">Ejecución</span><span class="ms-tag" data-i18n="what.c2.s3tag">En curso</span></div>
+            <div class="mstep"><span class="ms-t" data-i18n="what.c2.s4">Escala</span><span class="ms-tag">Q4</span></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Software a medida -->
+      <article class="bcard b-5 rv">
+        <h3 data-i18n="what.c3.t">Software y tecnología a medida</h3>
+        <p data-i18n="what.c3.d">Herramientas dedicadas para tu operación: dashboards, automatizaciones y productos construidos con IA.</p>
+        <div class="b-ui" aria-hidden="true">
+          <div class="mini-app">
+            <div class="ma-bar">
+              <span class="ma-input"><span data-i18n="what.c3.input">Automatizar reporte semanal…</span><span class="type-caret"></span></span>
+              <span class="ma-btn" data-i18n="what.c3.btn">Crear</span>
+            </div>
+            <div class="ma-item"><span class="ok">✓</span><span data-i18n="what.c3.i1">Conectado a BigQuery</span></div>
+            <div class="ma-item"><span class="ok">✓</span><span data-i18n="what.c3.i2">Dashboard generado</span></div>
+            <div class="ma-item"><span class="ok">✓</span><span data-i18n="what.c3.i3">Alerta enviada a Slack</span></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Multi-sistemas -->
+      <article class="bcard b-7 rv rv-d1">
+        <h3 data-i18n="what.c4.t">Multi-sistemas integrados</h3>
+        <p data-i18n="what.c4.d">Ads, CRM, datos y mensajería hablando entre sí. Un solo flujo de punta a punta, sin silos.</p>
+        <div class="b-ui" aria-hidden="true">
+          <div class="mini-net">
+            <svg viewBox="0 0 400 150" preserveAspectRatio="none">
+              <path class="edge hot" d="M78 34 C130 34 150 75 200 75"/>
+              <path class="edge" d="M70 116 C130 116 150 75 200 75"/>
+              <path class="edge hot" d="M200 75 C250 75 270 34 330 34"/>
+              <path class="edge" d="M200 75 C250 75 270 116 322 116"/>
+            </svg>
+            <span class="node" style="top:22%;left:14%">ADS</span>
+            <span class="node" style="top:78%;left:12%">CRM</span>
+            <span class="node core" style="top:50%;left:50%">VALEUM</span>
+            <span class="node" style="top:22%;left:86%">DATA</span>
+            <span class="node" style="top:78%;left:84%">WHATSAPP</span>
+          </div>
+        </div>
+      </article>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ CONSULTORÍA ============ -->
+<section id="consultoria">
+  <div class="wrap">
+    <span class="eyebrow rv" data-i18n="cons.label">Consultoría</span>
+    <h2 class="sec-title rv rv-d1"><span data-i18n="cons.t1">Criterio experto,</span> <span class="accent" data-i18n="cons.t2">donde más pesa.</span></h2>
+    <p class="sec-sub rv rv-d2" data-i18n="cons.sub">Seis frentes donde acompañamos decisiones que mueven la aguja.</p>
+
+    <div class="cons-grid">
+      <article class="ccard rv">
+        <span class="cnum">01</span>
+        <div class="ci"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 15 8 9l3.5 3.5L17 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 6H17v4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>Growth</h3>
+        <p data-i18n="cons.i1">Estrategias de crecimiento medibles: adquisición, retención y unit economics claros.</p>
+      </article>
+      <article class="ccard rv rv-d1">
+        <span class="cnum">02</span>
+        <div class="ci"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 12.5v-5l9-4v13l-9-4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 8.5c2.2 0 4 .9 4 1.5s-1.8 1.5-4 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M5.5 13v3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+        <h3>Marketing</h3>
+        <p data-i18n="cons.i2">Del posicionamiento al performance: campañas, canales y mensajes que convierten.</p>
+      </article>
+      <article class="ccard rv rv-d2">
+        <span class="cnum">03</span>
+        <div class="ci"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.7"/><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.7"/><path d="M10 3v2.2M10 14.8V17M3 10h2.2M14.8 10H17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+        <h3 data-i18n="cons.i3t">Diseño</h3>
+        <p data-i18n="cons.i3">Interfaces y marcas con intención: diseño que se ve bien y vende mejor.</p>
+      </article>
+      <article class="ccard rv">
+        <span class="cnum">04</span>
+        <div class="ci"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6.2" height="6.2" rx="1.8" stroke="currentColor" stroke-width="1.7"/><rect x="10.8" y="3" width="6.2" height="6.2" rx="1.8" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="10.8" width="6.2" height="6.2" rx="1.8" stroke="currentColor" stroke-width="1.7"/><path d="M13.9 11v6M10.9 14h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+        <h3 data-i18n="cons.i4t">Creación de producto</h3>
+        <p data-i18n="cons.i4">De la idea al MVP: definimos, priorizamos y construimos productos que la gente usa.</p>
+      </article>
+      <article class="ccard rv rv-d1">
+        <span class="cnum">05</span>
+        <div class="ci"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="m7.5 6.5-4 3.5 4 3.5M12.5 6.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 data-i18n="cons.i5t">Tecnología customizable</h3>
+        <p data-i18n="cons.i5">Sistemas a tu medida sobre tu stack: integraciones, automatizaciones y datos.</p>
+      </article>
+      <article class="ccard rv rv-d2">
+        <span class="cnum">06</span>
+        <div class="ci"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3.5 16.5v-6M10 16.5v-13M16.5 16.5v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <h3 data-i18n="cons.i6t">Consultoría en negocios</h3>
+        <p data-i18n="cons.i6">Modelo, pricing y operación: orden financiero y foco para escalar con margen.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CUSTOM PRODUCTS ============ -->
+<section id="productos" class="sec-dark">
+  <div class="wrap">
+    <span class="eyebrow rv" data-i18n="prod.label">Custom products</span>
+    <h2 class="sec-title rv rv-d1"><span data-i18n="prod.t1">Software propio,</span> <span class="accent" data-i18n="prod.t2">probado en batalla.</span></h2>
+    <p class="sec-sub rv rv-d2" data-i18n="prod.sub">Productos creados a la medida y customización de sistemas agénticos. Nacieron resolviendo nuestros propios problemas de escala y hoy impulsan a otros negocios.</p>
+
+    <div class="prod-grid">
+      <article class="pcard rv">
+        <div class="pcard-top">
+          <div class="plogo" aria-hidden="true">S</div>
+          <div>
+            <h3>SpeedAds</h3>
+            <span class="ptag" data-i18n="prod.p1.tag">Performance · IA</span>
+          </div>
+        </div>
+        <p data-i18n="prod.p1.d">Lanza cientos de campañas de performance en minutos. Genera videos, imágenes y copies con IA y despliega a múltiples categorías y países desde un solo lugar.</p>
+      </article>
+
+      <article class="pcard rv rv-d1">
+        <div class="pcard-top">
+          <div class="plogo" aria-hidden="true">F</div>
+          <div>
+            <h3>Flow</h3>
+            <span class="ptag" data-i18n="prod.p2.tag">Operaciones · Equipos</span>
+          </div>
+        </div>
+        <p data-i18n="prod.p2.d">Orquesta el trabajo de todos tus equipos en un solo tablero. Menos caos, más ejecución: tareas, entregas y seguimiento, sincronizados.</p>
+      </article>
+
+      <article class="pcard rv">
+        <div class="pcard-top">
+          <div class="plogo" aria-hidden="true">L</div>
+          <div>
+            <h3>Lenguas</h3>
+            <span class="ptag" data-i18n="prod.p3.tag">EdTech · Voz + IA</span>
+          </div>
+        </div>
+        <p data-i18n="prod.p3.d">Habla inglés con confianza. Práctica de speaking con IA, feedback en tiempo real y conversaciones que se adaptan a tu nivel.</p>
+      </article>
+
+      <article class="pcard rv rv-d1">
+        <div class="pcard-top">
+          <div class="plogo" aria-hidden="true">C</div>
+          <div>
+            <h3>Compraloy</h3>
+            <span class="ptag" data-i18n="prod.p4.tag">E-commerce · Multi-canal</span>
+          </div>
+        </div>
+        <p data-i18n="prod.p4.d">El motor de e-commerce que alimenta todos tus canales. Un catálogo, ventas conectadas y sincronización con múltiples sistemas de venta.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AGENDA CON FILTRO ============ -->
+<section class="agenda" id="agenda">
+  <div class="wrap">
+    <div class="agenda-head">
+      <span class="eyebrow rv" data-i18n="agenda.label">Agenda</span>
+      <h2 class="sec-title rv rv-d1"><span data-i18n="agenda.t1">Cuéntanos qué buscas y</span> <span class="accent" data-i18n="agenda.t2">agenda con nosotros.</span></h2>
+      <p class="sec-sub rv rv-d2" data-i18n="agenda.sub">Cinco pasos rápidos. Si vemos que podemos aportarte valor, se desbloquea nuestra agenda para reservar tu llamada.</p>
+    </div>
+
+    <div class="filter-shell rv rv-d2" id="filterShell">
+      <div class="filter-top">
+        <span class="filter-step-label" id="stepLabel" aria-live="polite">Paso 1 de 4</span>
+        <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1" id="progressBar"><i id="progressFill"></i></div>
+      </div>
+      <div class="filter-body" id="filterBody">
+        <!-- steps rendered by JS -->
+      </div>
+    </div>
+
+    <div class="cal" id="cal" aria-hidden="true">
+      <div class="cal-body" id="calBody">
+        <!-- contenido renderizado por JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRUEBA SOCIAL ============ -->
+<section class="social" aria-label="Prueba social">
+  <div class="wrap">
+    <div class="testi-grid">
+      <article class="tcard rv">
+        <p class="tq" data-i18n="t1.q">“Pasamos de lanzar 10 campañas por semana a más de 100 por día, con mejor ROAS. El sistema hace el trabajo pesado.”</p>
+        <div class="tperson">
+          <div class="tava" aria-hidden="true">AE</div>
+          <div>
+            <div class="tname">Andrés Estupiñán</div>
+            <div class="trole" data-i18n="t1.r">Growth Manager · SpeedAds</div>
+          </div>
+        </div>
+      </article>
+      <article class="tcard rv rv-d1">
+        <p class="tq" data-i18n="t2.q">“Ayudaron a conectar todas las fuentes de mi e-commerce y crearon Mana, un software custom para la centralización de todo mi ecosistema de e-commerce.”</p>
+        <div class="tperson">
+          <div class="tava" aria-hidden="true">CC</div>
+          <div>
+            <div class="tname">Carlos Cabrera</div>
+            <div class="trole" data-i18n="t2.r">Head Manager · Compraloy</div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq">
+  <div class="wrap">
+    <span class="eyebrow rv" data-i18n="faq.label">FAQ</span>
+    <h2 class="sec-title rv rv-d1"><span data-i18n="faq.t1">Preguntas</span> <span class="accent" data-i18n="faq.t2">frecuentes.</span></h2>
+    <div class="faq-list" id="faqList">
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false"><span data-i18n="faq.q1">¿Qué hace exactamente Valeum?</span><span class="fplus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p data-i18n="faq.a1">Somos un AI hub: gestionamos marketing performance a escala, damos consultoría estratégica y construimos software a medida. La diferencia es que integramos las tres cosas en un solo sistema que trabaja de punta a punta.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false"><span data-i18n="faq.q2">¿Cómo trabajamos juntos?</span><span class="fplus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p data-i18n="faq.a2">Empezamos con una llamada de diagnóstico. De ahí sale un plan claro con alcance, entregables y métricas de éxito. Trabajamos por ciclos cortos con revisiones frecuentes: siempre sabes qué se hizo, qué sigue y qué resultado está dando.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false"><span data-i18n="faq.q3">¿En cuánto tiempo se ven resultados?</span><span class="fplus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p data-i18n="faq.a3">Depende del servicio: en performance, las primeras señales llegan en las primeras semanas de campañas activas. En software, trabajamos con entregas funcionales desde el primer ciclo. En consultoría, sales de la primera sesión con un diagnóstico accionable.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false"><span data-i18n="faq.q4">¿Trabajan con empresas fuera de LATAM?</span><span class="fplus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p data-i18n="faq.a4">Sí. Escalamos campañas en más de 20 países, incluidos mercados Tier 1 de Europa y Norteamérica, y trabajamos en español, inglés y portugués.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false"><span data-i18n="faq.q5">¿Cómo empiezo?</span><span class="fplus" aria-hidden="true"></span></button>
+        <div class="faq-a"><p data-i18n="faq.a5">Completa el formulario de la sección Agenda (toma menos de un minuto). Si vemos que podemos aportarte valor, se desbloquea la agenda para reservar una llamada de 15 minutos sin costo.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA FINAL + FOOTER ============ -->
+<section class="final">
+  <div class="wrap final-inner">
+    <span class="eyebrow rv" style="color:var(--dark-muted)" data-i18n="final.label">¿Listo?</span>
+    <h2 class="rv rv-d1"><span data-i18n="final.t1">Tu próximo sistema de crecimiento</span> <span class="accent" data-i18n="final.t2">empieza con una llamada.</span></h2>
+    <p class="sec-sub rv rv-d2" data-i18n="final.sub">Sin compromiso. 15 minutos para entender tu negocio y decirte, con honestidad, si podemos agregarte valor.</p>
+    <a href="#agenda" class="btn btn-primary magnetic rv rv-d3">
+      <span data-i18n="final.cta">Agenda una llamada</span>
+      <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+  <footer class="footer">
+    <div class="footer-inner">
+      <a href="#top" class="logo logo-light" aria-label="Valeum"><img class="logo-img" src="data:image/png;base64,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" alt="Valeum"></a>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="#que-hacemos" data-i18n="nav.what">Qué hacemos</a>
+        <a href="#productos" data-i18n="nav.products">Productos</a>
+        <a href="#consultoria" data-i18n="nav.consulting">Consultoría</a>
+        <a href="#agenda" data-i18n="nav.agenda">Agenda</a>
+        <a href="#equipo" data-i18n="footer.team.l">Equipo</a>
+        <a href="#" data-i18n="footer.terms">Términos y condiciones</a>
+        <a href="#" data-i18n="footer.privacy">Política de privacidad</a>
+      </nav>
+      <div class="lang" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="es" class="active">ES</button>
+        <button type="button" data-lang="pt">PT</button>
+      </div>
+      <div class="footer-links" style="margin-left:auto">
+        <a href="#" rel="noopener">LinkedIn</a>
+        <a href="#" rel="noopener">Instagram</a>
+        <a href="#" rel="noopener">X</a>
+      </div>
+      <div class="footer-team" id="equipo">
+        <span class="ft-l" data-i18n="footer.team.l">Equipo</span>
+        <span class="ft-d" data-i18n="footer.team.d">Distribuido entre 🇺🇸 USA · 🇨🇴 Colombia · 🇵🇪 Perú · 🇲🇽 México</span>
+      </div>
+      <div class="footer-value">
+        <span><span data-i18n="footer.v1">Valeum viene de</span> <span class="vword" data-i18n="footer.v2">valor</span><span data-i18n="footer.v3">. Todo lo que construimos existe para incrementar el Valeum de los negocios.</span></span>
+        <span class="rights">© 2026 VALEUM · LATAM</span>
+      </div>
+    </div>
+  </footer>
+</section>
+
+</main>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
 </html>
