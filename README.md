@@ -85,6 +85,12 @@ npm run lint
 npm run build
 ```
 
+Para comprobar que la cuenta de servicio de Google quedó bien configurada (delegación de dominio, API habilitada y lectura de ambos calendarios):
+
+```bash
+npm run check:google
+```
+
 ## Variables de entorno
 
 Todas son **server-side** — ninguna lleva prefijo `VITE_`. Ver [.env.example](.env.example) para la lista completa: Supabase, SMTP, correos y calendarios de Jesús y Harry, cuenta de servicio de Google y `SYNC_SECRET`.
