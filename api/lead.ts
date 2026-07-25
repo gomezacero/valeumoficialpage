@@ -6,8 +6,8 @@
    ============================================================ */
 import { createHash } from "node:crypto";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { ownerConfig } from "./_lib/env";
-import { sendMail } from "./_lib/mailer";
+import { ownerConfig } from "./_lib/env.js";
+import { sendMail } from "./_lib/mailer.js";
 import {
   BUDGETS,
   SERVICES,
@@ -18,9 +18,9 @@ import {
   type Budget,
   type Service,
   type Stage,
-} from "./_lib/scoring";
-import { getSupabase } from "./_lib/supabase";
-import { leadEmail, type LeadData } from "./_lib/templates";
+} from "./_lib/scoring.js";
+import { getSupabase } from "./_lib/supabase.js";
+import { leadEmail, type LeadData } from "./_lib/templates.js";
 
 /** Límites de longitud, alineados con el formulario. */
 const MAX = { business: 2000, name: 120, email: 200, company: 200, country: 120 } as const;

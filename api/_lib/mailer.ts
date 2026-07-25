@@ -2,7 +2,7 @@
    VALEUM — ENVÍO DE CORREO (SMTP Google Workspace)
    ============================================================ */
 import nodemailer, { type Transporter } from "nodemailer";
-import { optionalEnv, requireEnv } from "./env";
+import { optionalEnv, requireEnv } from "./env.js";
 
 let transporter: Transporter | null = null;
 

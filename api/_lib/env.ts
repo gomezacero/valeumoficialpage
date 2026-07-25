@@ -3,7 +3,7 @@
    Falla ruidosamente si falta algo, en vez de fallar en silencio
    a mitad de un envío.
    ============================================================ */
-import type { Owner } from "./scoring";
+import type { Owner } from "./scoring.js";
 
 export function requireEnv(name: string): string {
   const v = process.env[name];

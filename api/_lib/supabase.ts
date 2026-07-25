@@ -3,7 +3,7 @@
    Apunta al schema aislado valeum_web del proyecto designflow-ai.
    ============================================================ */
 import { createClient } from "@supabase/supabase-js";
-import { requireEnv } from "./env";
+import { requireEnv } from "./env.js";
 
 function makeClient() {
   return createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), {

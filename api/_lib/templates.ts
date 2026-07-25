@@ -2,7 +2,7 @@
    VALEUM — PLANTILLAS DE CORREO
    Internas: siempre en español, sin importar el idioma del lead.
    ============================================================ */
-import { LABELS, type Budget, type Owner, type Service, type Stage } from "./scoring";
+import { LABELS, type Budget, type Owner, type Service, type Stage } from "./scoring.js";
 
 const ACCENT = "#FF4D00";
 const INK = "#14140F";

@@ -6,7 +6,7 @@
    ~100 MB y no cabe cómodamente en una función serverless.
    ============================================================ */
 import { JWT } from "google-auth-library";
-import { requireEnv } from "./env";
+import { requireEnv } from "./env.js";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 const API = "https://www.googleapis.com/calendar/v3";

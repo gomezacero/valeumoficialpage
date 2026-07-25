@@ -10,12 +10,12 @@
    ============================================================ */
 import { timingSafeEqual } from "node:crypto";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { optionalEnv, ownerConfig, requireEnv } from "../_lib/env";
-import { SyncTokenExpired, listAllEvents, type GoogleEvent } from "../_lib/google";
-import { sendMail } from "../_lib/mailer";
-import type { Budget, Owner, Service, Stage } from "../_lib/scoring";
-import { getSupabase, type ValeumClient } from "../_lib/supabase";
-import { bookingEmail, type LeadData } from "../_lib/templates";
+import { optionalEnv, ownerConfig, requireEnv } from "../_lib/env.js";
+import { SyncTokenExpired, listAllEvents, type GoogleEvent } from "../_lib/google.js";
+import { sendMail } from "../_lib/mailer.js";
+import type { Budget, Owner, Service, Stage } from "../_lib/scoring.js";
+import { getSupabase, type ValeumClient } from "../_lib/supabase.js";
+import { bookingEmail, type LeadData } from "../_lib/templates.js";
 
 const OWNERS: Owner[] = ["jesus", "harry"];
 
