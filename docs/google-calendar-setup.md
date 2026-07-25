@@ -2,6 +2,26 @@
 
 Estado de la integración que detecta las reservas y envía el correo de "reunión agendada".
 
+## GCP y Workspace son cosas separadas
+
+No hay que "vincular el dominio a GCP": son dos productos distintos y el puente entre ellos es un único dato, el **Client ID** de la cuenta de servicio.
+
+- El **proyecto de Cloud** (`valeum-bb990`) es propiedad de una cuenta `@gmail.com` personal. Es perfectamente válido y ya funciona: ahí vive la cuenta de servicio y su clave.
+- El **Workspace** de `valeum.co` es donde están los buzones y calendarios de Jesús y Harry, y donde se autoriza al Client ID a leerlos.
+
+No hace falta mover el proyecto, ni crear una organización de GCP, ni verificar el dominio en Cloud. Que `gcloud organizations list` devuelva vacío es solo consecuencia de que el proyecto se creó desde una cuenta personal, y no afecta en nada a esta integración.
+
+**El envío de correo tampoco pasa por GCP.** El SMTP usa una cuenta de Workspace de `valeum.co` con una contraseña de aplicación; el proyecto de Cloud no interviene.
+
+### Comprobado por DNS
+
+| Dominio | MX | Conclusión |
+|---|---|---|
+| `valeum.co` | `smtp.google.com` | Google Workspace activo — la delegación de dominio es posible |
+| `quicktipss.com` | `smtp.google.com` | Google Workspace activo |
+
+`valeum.co` apunta además a Vercel (`www` → `vercel-dns`), así que es el dominio del sitio en producción.
+
 ## Ya está hecho
 
 Creado con `gcloud` en el proyecto **`valeum-bb990`** (nombre: *valeum*):
@@ -68,7 +88,15 @@ Verifica las variables, la delegación y la lectura de ambos calendarios, y trad
 
 ## Requisito: tiene que ser Workspace
 
-La delegación de dominio **solo existe en Google Workspace con dominio propio**. Si los calendarios de Jesús y Harry fueran cuentas `@gmail.com` personales, este mecanismo no aplica y habría que cambiar el enfoque a OAuth con consentimiento individual de cada uno (autorizan una vez y se guarda su *refresh token*).
+La delegación de dominio **solo existe en Google Workspace con dominio propio**. Confirmado por DNS que `valeum.co` lo tiene, así que este camino es viable. Si los calendarios estuvieran en cuentas `@gmail.com` personales, habría que cambiar el enfoque a OAuth con consentimiento individual de cada uno.
+
+## Pendiente aparte: SPF y DKIM
+
+Ni `valeum.co` ni `quicktipss.com` tienen registros TXT: **no hay SPF ni DKIM configurados**.
+
+Para lo que hace este sistema hoy no es bloqueante, porque los correos van de una cuenta `@valeum.co` a `jesus@valeum.co` y `harry@valeum.co` — mismo dominio, entrega interna de Google, sin filtros severos de por medio.
+
+Conviene configurarlos igualmente: es gratis, son dos registros DNS, y en cuanto se envíe cualquier correo a un destinatario externo (un lead, por ejemplo) la diferencia entre bandeja de entrada y spam la marcan justamente SPF y DKIM.
 
 ## Rotar la clave
 
