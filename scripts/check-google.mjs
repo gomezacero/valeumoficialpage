@@ -108,10 +108,11 @@ if (!checkEnv()) {
   process.exit(1);
 }
 
-const results = await Promise.all([
-  checkCalendar("Jesús", process.env.JESUS_CALENDAR_ID),
-  checkCalendar("Harry", process.env.HARRY_CALENDAR_ID),
-]);
+// Secuencial a propósito: en paralelo los mensajes de ambas cuentas se
+// entremezclan y no se sabe qué error pertenece a cuál.
+const results = [];
+results.push(await checkCalendar("Jesús", process.env.JESUS_CALENDAR_ID));
+results.push(await checkCalendar("Harry", process.env.HARRY_CALENDAR_ID));
 
 if (results.every(Boolean)) {
   console.log("\n\x1b[32mTodo correcto: el sync de calendarios puede funcionar.\x1b[0m\n");
