@@ -1,0 +1,40 @@
+name: Sincronizar reservas de Google Calendar
+
+# Se usa GitHub Actions en vez de Vercel Cron porque el plan Hobby de Vercel
+# limita a una ejecución diaria; aquí el cron es gratis e ilimitado.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: calendar-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Llamar al endpoint de sincronización
+        env:
+          SYNC_URL: ${{ secrets.VALEUM_SYNC_URL }}
+          SYNC_SECRET: ${{ secrets.VALEUM_SYNC_SECRET }}
+        run: |
+          if [ -z "$SYNC_URL" ] || [ -z "$SYNC_SECRET" ]; then
+            echo "Faltan los secretos VALEUM_SYNC_URL o VALEUM_SYNC_SECRET"
+            exit 1
+          fi
+
+          response=$(curl --silent --show-error --fail-with-body \
+            --max-time 60 \
+            --header "Authorization: Bearer $SYNC_SECRET" \
+            "$SYNC_URL")
+
+          echo "$response"
+
+          # El endpoint responde 200 aunque un calendario falle: ok=false lo delata.
+          if echo "$response" | grep -q '"ok":false'; then
+            echo "::error::La sincronización terminó con errores"
+            exit 1
+          fi
