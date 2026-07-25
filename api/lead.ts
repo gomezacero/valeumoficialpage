@@ -94,30 +94,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const supabase = getSupabase();
   const ipHash = hashIp(clientIp(req));
 
-  // --- Límite por IP -------------------------------------------------------
-  const since = new Date(Date.now() - RATE_LIMIT.windowMinutes * 60_000).toISOString();
-  const { count, error: countError } = await supabase
-    .from("leads")
-    .select("id", { count: "exact", head: true })
-    .eq("ip_hash", ipHash)
-    .gte("created_at", since);
-
-  if (!countError && (count ?? 0) >= RATE_LIMIT.max) {
-    res.status(429).json({ error: "rate_limited" });
-    return;
-  }
-
   // --- Decisión del servidor ----------------------------------------------
+  // Se calcula antes de tocar la base de datos: el veredicto y el calendario
+  // no dependen de que la persistencia esté disponible.
   const score = computeScore(service, stage, budget);
   const matched = isMatch(score);
   const owner = assignOwner(service);
   const { email: ownerEmail, calendarUrl } = ownerConfig(owner);
 
-  // --- Persistencia --------------------------------------------------------
-  const { error: insertError } = await supabase.from("leads").insert({
+  const record = {
     service,
     stage,
     budget,
@@ -134,12 +121,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     source: str(body.source, 60) || "valeum-landing",
     user_agent: str(req.headers["user-agent"], 500),
     ip_hash: ipHash,
-  });
+  };
 
-  if (insertError) {
-    console.error("[valeum] error al guardar el lead:", insertError);
-    res.status(500).json({ error: "storage_failed" });
-    return;
+  // --- Persistencia --------------------------------------------------------
+  // Si Supabase no está configurado o falla, el lead NO se pierde: queda
+  // completo en los logs de Vercel, de donde se puede recuperar a mano.
+  // Nunca se devuelve un error al visitante por un problema de infraestructura.
+  let stored = false;
+  try {
+    const supabase = getSupabase();
+
+    // Límite por IP (solo posible con base de datos disponible).
+    const since = new Date(Date.now() - RATE_LIMIT.windowMinutes * 60_000).toISOString();
+    const { count, error: countError } = await supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("ip_hash", ipHash)
+      .gte("created_at", since);
+
+    if (!countError && (count ?? 0) >= RATE_LIMIT.max) {
+      res.status(429).json({ error: "rate_limited" });
+      return;
+    }
+
+    const { error: insertError } = await supabase.from("leads").insert(record);
+    if (insertError) throw insertError;
+    stored = true;
+  } catch (err) {
+    console.error("[valeum] LEAD NO GUARDADO — recuperar de este log:", JSON.stringify(record));
+    console.error("[valeum] causa:", err instanceof Error ? err.message : err);
   }
 
   // --- Aviso por correo ----------------------------------------------------
@@ -160,12 +170,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     lang,
   };
 
+  let notified = false;
   try {
     const mail = leadEmail(leadData);
     await sendMail({ to: ownerEmail, replyTo: email, ...mail });
+    notified = true;
   } catch (err) {
-    console.error("[valeum] lead guardado pero el correo falló:", err);
+    console.error("[valeum] no se pudo enviar el aviso por correo:", err instanceof Error ? err.message : err);
   }
+
+  // Deja rastro del estado real de cada envío, para detectar de un vistazo
+  // si falta configuración sin tener que reproducir el caso.
+  console.log(`[valeum] lead de ${email} · guardado=${stored} · notificado=${notified}`);
 
   res.status(200).json({ matched, calendarUrl: matched ? calendarUrl : "" });
 }
