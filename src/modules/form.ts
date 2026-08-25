@@ -7,6 +7,7 @@
 import { $, $$, esc } from "./dom";
 import { getLang, t } from "./i18n";
 import { FALLBACK_CAL_URLS, unlockCalendar } from "./calendar";
+import { trackStep } from "./track";
 
 const LEAD_ENDPOINT = "/api/lead";
 
@@ -105,6 +106,9 @@ export function renderForm(): void {
   }
 
   const s = state.step;
+  // Solo a partir del paso 2: llegar al 1 es simplemente cargar la página,
+  // no significa que el visitante haya respondido nada.
+  if (s > 1) trackStep(s, getLang());
   stepLabel.textContent = t("form.step").replace("{n}", String(s));
   progressBar.setAttribute("aria-valuenow", String(s));
   progressFill.style.width = (s / 5) * 100 + "%";
@@ -293,6 +297,8 @@ async function onSubmit(): Promise<void> {
     matched = true;
     calendarUrl = FALLBACK_CAL_URLS[Math.floor(Math.random() * FALLBACK_CAL_URLS.length)];
   }
+
+  trackStep(6, getLang());
 
   state.sending = false;
   state.matched = matched;

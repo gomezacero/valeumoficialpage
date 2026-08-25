@@ -3,10 +3,11 @@
    ============================================================ */
 import "./styles.css";
 import { $$ } from "./modules/dom";
-import { applyLang } from "./modules/i18n";
+import { applyLang, getLang } from "./modules/i18n";
 import { initUI } from "./modules/ui";
 import { renderForm } from "./modules/form";
 import { renderCalendar } from "./modules/calendar";
+import { trackFormVisible } from "./modules/track";
 
 /** Todo lo que debe repintarse al cambiar de idioma. */
 function rerenderDynamic(): void {
@@ -23,6 +24,9 @@ function init(): void {
 
   renderForm();
   applyLang("es", rerenderDynamic);
+
+  // Mide cuánta gente llega a ver el formulario, aunque no lo empiece.
+  trackFormVisible(getLang);
 }
 
 if (document.readyState === "loading") {
