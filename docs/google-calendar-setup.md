@@ -1,76 +1,60 @@
 # Configuración de Google Calendar
 
-Estado de la integración que detecta las reservas y envía el correo de "reunión agendada".
+Cómo el sistema detecta las reservas para enviar el correo de "reunión agendada".
 
-## GCP y Workspace son cosas separadas
+## La forma recomendada: compartir el calendario (sin administrador)
 
-No hay que "vincular el dominio a GCP": son dos productos distintos y el puente entre ellos es un único dato, el **Client ID** de la cuenta de servicio.
+La cuenta de servicio tiene su propia dirección de correo. Un calendario de Google se puede compartir con cualquier dirección, incluida la suya. Así entra con su propia identidad a los calendarios que le hayan compartido, **sin necesidad de ningún permiso de administrador**.
 
-- El **proyecto de Cloud** (`valeum-bb990`) es propiedad de una cuenta `@gmail.com` personal. Es perfectamente válido y ya funciona: ahí vive la cuenta de servicio y su clave.
-- El **Workspace** de `valeum.co` es donde están los buzones y calendarios de Jesús y Harry, y donde se autoriza al Client ID a leerlos.
+Cada persona lo hace en su Google Calendar, en menos de un minuto:
 
-No hace falta mover el proyecto, ni crear una organización de GCP, ni verificar el dominio en Cloud. Que `gcloud organizations list` devuelva vacío es solo consecuencia de que el proyecto se creó desde una cuenta personal, y no afecta en nada a esta integración.
+1. Abre [Google Calendar](https://calendar.google.com)
+2. En la barra lateral, sobre su calendario principal, pulsa los **tres puntos** → **Configuración y uso compartido**
+3. Baja hasta **Compartir con determinadas personas o grupos** → **Añadir personas**
+4. Pega esta dirección:
 
-**El envío de correo tampoco pasa por GCP.** El SMTP usa una cuenta de Workspace de `valeum.co` con una contraseña de aplicación; el proyecto de Cloud no interviene.
+```
+valeum-calendar@valeum-bb990.iam.gserviceaccount.com
+```
 
-### Comprobado por DNS
+5. En permisos elige **"Ver todos los detalles del evento"** (hace falta ese nivel: con "ver solo libre/ocupado" no se puede leer quién reservó)
+6. **Enviar**
 
-| Dominio | MX | Conclusión |
-|---|---|---|
-| `valeum.co` | `smtp.google.com` | Google Workspace activo — la delegación de dominio es posible |
-| `quicktipss.com` | `smtp.google.com` | Google Workspace activo |
+Google puede avisar de que la dirección no parece una cuenta de Google. Es normal en las cuentas de servicio: continúa igualmente.
 
-`valeum.co` apunta además a Vercel (`www` → `vercel-dns`), así que es el dominio del sitio en producción.
+Lo tienen que hacer **Jesús y Harry**, cada uno con su calendario.
 
-## Ya está hecho
+## La alternativa: delegación de dominio (requiere superadministrador)
 
-Creado con `gcloud` en el proyecto **`valeum-bb990`** (nombre: *valeum*):
+Da acceso a todo el dominio sin que nadie comparta nada, pero exige que un **superadministrador** del Workspace la autorice. Solo merece la pena si el número de calendarios va a crecer.
+
+Para activarla, pon `GOOGLE_USE_IMPERSONATION=true` en las variables de entorno y autoriza en la consola de administración:
+
+**Seguridad → Control de acceso y datos → Controles de API → Gestionar delegación de todo el dominio → Añadir nueva**
+
+| Campo | Valor |
+|---|---|
+| ID de cliente | `111921652134743769433` |
+| Ámbitos de OAuth | `https://www.googleapis.com/auth/calendar.readonly` |
+
+Sin esa variable, el sistema usa el modo compartido y esta sección no hace falta.
+
+## Lo que ya está hecho
+
+Creado con `gcloud` en el proyecto **`valeum-bb990`**:
 
 | Elemento | Valor |
 |---|---|
-| Google Calendar API | Habilitada (`calendar-json.googleapis.com`) |
+| Google Calendar API | Habilitada |
 | Cuenta de servicio | `valeum-calendar@valeum-bb990.iam.gserviceaccount.com` |
-| **Client ID (ID único)** | **`111921652134743769433`** |
-| Clave privada | Generada y guardada en el `.env` local |
+| Client ID | `111921652134743769433` |
+| Clave privada | Generada y configurada en Vercel |
 
-La cuenta de servicio **no tiene ningún rol de IAM** a propósito: sus permisos no vienen del proyecto de Cloud sino de la delegación de dominio, así que asignarle roles solo ampliaría la superficie sin aportar nada.
+La cuenta de servicio no tiene ningún rol de IAM a propósito: su acceso viene de los calendarios que le comparten, no del proyecto de Cloud.
 
-## Falta: autorizar la delegación de dominio
+### Sobre el Workspace
 
-Este paso **no tiene API pública**: se hace a mano en la consola de administración y **requiere un superadministrador** del Google Workspace.
-
-En [admin.google.com](https://admin.google.com):
-
-1. **Seguridad → Control de acceso y de datos → Controles de API**
-2. Abajo: **Gestionar delegación de todo el dominio** → **Añadir nueva**
-3. **ID de cliente:**
-
-```
-111921652134743769433
-```
-
-4. **Ámbitos de OAuth** (exactamente esta cadena, sin espacios):
-
-```
-https://www.googleapis.com/auth/calendar.readonly
-```
-
-5. **Autorizar**
-
-Es solo lectura: el sistema nunca crea ni modifica eventos, únicamente detecta las reservas que ya existen.
-
-La propagación suele tardar minutos, aunque Google se reserva hasta 24 horas.
-
-## Falta: los correos de Workspace
-
-En el `.env` local y en las variables de Vercel:
-
-```
-JESUS_CALENDAR_ID="jesus@eldominio.com"
-HARRY_CALENDAR_ID="harry@eldominio.com"
-```
-
-Son simplemente sus correos de Workspace: la cuenta de servicio los suplanta para leer su calendario principal.
+Comprobado: `valeum.co` es **dominio secundario** del Workspace de `quicktipss.com` (organización *Capital Quick*), y los buzones `jesusmontero@valeum.co` y `harry@valeum.co` existen en él.
 
 ## Comprobar que quedó bien
 
@@ -78,29 +62,15 @@ Son simplemente sus correos de Workspace: la cuenta de servicio los suplanta par
 npm run check:google
 ```
 
-Verifica las variables, la delegación y la lectura de ambos calendarios, y traduce los errores típicos a su causa concreta:
-
-| Error | Causa |
+| Mensaje | Significado |
 |---|---|
-| `unauthorized_client` | El Client ID no está autorizado, o el ámbito no coincide carácter por carácter. También aparece si aún no se ha propagado. |
-| `invalid_grant` | El correo suplantado no existe en el dominio, o la clave está mal copiada. |
-| `403 accessNotConfigured` | La Calendar API no está habilitada (ya lo está en `valeum-bb990`). |
-
-## Requisito: tiene que ser Workspace
-
-La delegación de dominio **solo existe en Google Workspace con dominio propio**. Confirmado por DNS que `valeum.co` lo tiene, así que este camino es viable. Si los calendarios estuvieran en cuentas `@gmail.com` personales, habría que cambiar el enfoque a OAuth con consentimiento individual de cada uno.
-
-## Pendiente aparte: SPF y DKIM
-
-Ni `valeum.co` ni `quicktipss.com` tienen registros TXT: **no hay SPF ni DKIM configurados**.
-
-Para lo que hace este sistema hoy no es bloqueante, porque los correos van de una cuenta `@valeum.co` a `jesus@valeum.co` y `harry@valeum.co` — mismo dominio, entrega interna de Google, sin filtros severos de por medio.
-
-Conviene configurarlos igualmente: es gratis, son dos registros DNS, y en cuanto se envíe cualquier correo a un destinatario externo (un lead, por ejemplo) la diferencia entre bandeja de entrada y spam la marcan justamente SPF y DKIM.
+| ✓ Token obtenido + ✓ Calendario leído | Todo listo |
+| ✓ Token obtenido + ✗ 404 | Falta que esa persona comparta su calendario |
+| ✗ `unauthorized_client` | Estás en modo delegación y no está autorizada |
+| ✗ `invalid_grant` | El correo no existe en el dominio |
+| ✗ `403 accessNotConfigured` | La Calendar API no está habilitada |
 
 ## Rotar la clave
-
-Si la clave se filtra o hay que renovarla:
 
 ```bash
 gcloud iam service-accounts keys list --iam-account=valeum-calendar@valeum-bb990.iam.gserviceaccount.com --project=valeum-bb990 --managed-by=user
@@ -110,4 +80,4 @@ gcloud iam service-accounts keys list --iam-account=valeum-calendar@valeum-bb990
 gcloud iam service-accounts keys delete <KEY_ID> --iam-account=valeum-calendar@valeum-bb990.iam.gserviceaccount.com --project=valeum-bb990
 ```
 
-Al crear la nueva, no vuelques el JSON a la consola: escribe el archivo y extrae los campos desde ahí. La delegación de dominio **no** hay que rehacerla — está atada al Client ID de la cuenta, no a la clave.
+Al crear la nueva, no vuelques el JSON a la consola: escribe el archivo y extrae los campos desde ahí. Los calendarios compartidos siguen funcionando: el permiso está atado a la dirección de la cuenta, no a la clave.

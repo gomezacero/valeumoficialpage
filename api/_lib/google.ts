@@ -6,7 +6,7 @@
    ~100 MB y no cabe cómodamente en una función serverless.
    ============================================================ */
 import { JWT } from "google-auth-library";
-import { requireEnv } from "./env.js";
+import { optionalEnv, requireEnv } from "./env.js";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 const API = "https://www.googleapis.com/calendar/v3";
@@ -29,15 +29,29 @@ export interface EventsPage {
   nextSyncToken?: string;
 }
 
-/** Token de acceso suplantando al dueño del calendario. */
+/**
+ * Token de acceso a un calendario. Dos modos:
+ *
+ * 1. Por defecto — la cuenta de servicio usa su PROPIA identidad y lee los
+ *    calendarios que le hayan compartido. No requiere permisos de
+ *    administrador: cada persona comparte su calendario con la dirección de
+ *    la cuenta de servicio, igual que lo compartiría con un compañero.
+ *
+ * 2. Con GOOGLE_USE_IMPERSONATION=true — suplanta al dueño mediante
+ *    delegación de dominio. Alcanza todo el dominio sin que nadie comparta
+ *    nada, pero exige que un superadministrador la autorice.
+ */
 async function accessTokenFor(subject: string): Promise<string> {
+  const impersonate = optionalEnv("GOOGLE_USE_IMPERSONATION") === "true";
+
   const client = new JWT({
     email: requireEnv("GOOGLE_SA_EMAIL"),
     // En Vercel la clave se guarda con \n literales.
     key: requireEnv("GOOGLE_SA_PRIVATE_KEY").replace(/\\n/g, "\n"),
     scopes: SCOPES,
-    subject,
+    ...(impersonate ? { subject } : {}),
   });
+
   const { token } = await client.getAccessToken();
   if (!token) throw new Error(`No se pudo obtener token para ${subject}`);
   return token;

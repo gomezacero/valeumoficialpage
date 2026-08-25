@@ -42,21 +42,22 @@ async function checkCalendar(owner, calendarId) {
 
   let token;
   try {
+    const impersonate = process.env.GOOGLE_USE_IMPERSONATION === "true";
     const client = new JWT({
       email: process.env.GOOGLE_SA_EMAIL,
       key: process.env.GOOGLE_SA_PRIVATE_KEY.replace(/\\n/g, "\n"),
       scopes: SCOPES,
-      subject: calendarId,
+      ...(impersonate ? { subject: calendarId } : {}),
     });
     ({ token } = await client.getAccessToken());
-    ok("Token obtenido: la delegación de dominio funciona");
+    ok(impersonate ? "Token obtenido: la delegación de dominio funciona" : "Token obtenido con la identidad de la cuenta de servicio");
   } catch (err) {
     const msg = String(err?.message || err);
     bad(`No se pudo obtener el token: ${msg}`);
     if (msg.includes("unauthorized_client")) {
-      info("Causa habitual: el Client ID no está autorizado en admin.google.com,");
-      info("o el ámbito no coincide EXACTAMENTE con calendar.readonly.");
-      info("Si acabas de configurarlo, puede tardar unos minutos en propagarse.");
+      info("La delegación de dominio no está autorizada en admin.google.com.");
+      info("Alternativa sin administrador: quita GOOGLE_USE_IMPERSONATION y pide");
+      info("a cada persona que comparta su calendario con " + process.env.GOOGLE_SA_EMAIL);
     } else if (msg.includes("invalid_grant")) {
       info("Causa habitual: el correo suplantado no existe en el dominio,");
       info("o la clave privada está mal copiada.");
@@ -78,7 +79,13 @@ async function checkCalendar(owner, calendarId) {
   if (!res.ok) {
     const body = await res.text();
     bad(`La API respondió ${res.status}`);
-    if (res.status === 403 && body.includes("accessNotConfigured")) {
+    if (res.status === 404) {
+      info("La cuenta de servicio no tiene acceso a este calendario.");
+      info("Pide a esta persona que lo comparta con:");
+      info("  " + process.env.GOOGLE_SA_EMAIL);
+      info("Google Calendar > Mis calendarios > tres puntos > Configuración y uso compartido");
+      info("> Compartir con determinadas personas > Anadir > Ver todos los detalles del evento");
+    } else if (res.status === 403 && body.includes("accessNotConfigured")) {
       info("La Google Calendar API no está habilitada en el proyecto de Cloud.");
     } else {
       info(body.slice(0, 300));
