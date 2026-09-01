@@ -432,6 +432,14 @@
 
 </main>
 
+<!-- Google Analytics 4 (propiedad heredada del Firebase anterior: conserva el histórico) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VWXEND98Q9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-VWXEND98Q9', { anonymize_ip: true });
+</script>
 <!-- Vercel Web Analytics: visitas y referrers. Sin cookies, no requiere banner de consentimiento. -->
 <script defer src="/_vercel/insights/script.js"></script>
 <script type="module" src="/src/main.ts"></script>

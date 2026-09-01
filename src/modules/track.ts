@@ -5,6 +5,12 @@
    que vive en esta pestaña y muere al cerrarla.
    ============================================================ */
 
+declare global {
+  interface Window {
+    gtag?: (command: string, eventName: string, params?: Record<string, unknown>) => void;
+  }
+}
+
 const ENDPOINT = "/api/track";
 const KEY = "valeum_sid";
 
@@ -32,6 +38,20 @@ let maxReported = -1;
 export function trackStep(step: number, lang: string): void {
   if (step <= maxReported) return;
   maxReported = step;
+
+  // GA4: el embudo también viaja a Analytics, para verlo sin escribir SQL.
+  // generate_lead es el evento estándar de conversión que GA4 reconoce.
+  try {
+    if (step >= 6) {
+      window.gtag?.("event", "generate_lead", { lang });
+    } else if (step > 0) {
+      window.gtag?.("event", "form_step", { step, lang });
+    } else {
+      window.gtag?.("event", "form_view", { lang });
+    }
+  } catch {
+    // Analytics nunca debe estorbar al visitante.
+  }
 
   const payload = JSON.stringify({
     session: sessionId(),
