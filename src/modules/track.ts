@@ -94,7 +94,9 @@ export function trackFormVisible(lang: () => string): void {
         }
       }
     },
-    { threshold: 0.25 }
+    // Umbral mínimo: la sección de agenda es muy alta y con un 25% podía no
+    // cumplirse nunca en pantallas pequeñas, perdiendo el inicio del embudo.
+    { threshold: 0, rootMargin: "0px 0px -15% 0px" }
   );
   io.observe(section);
 }

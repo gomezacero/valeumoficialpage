@@ -438,7 +438,9 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-VWXEND98Q9', { anonymize_ip: true });
+  // GA4 anonimiza la IP siempre; anonymize_ip era de Universal Analytics y,
+  // al pasarlo aquí, gtag lo adjuntaba como parámetro a cada evento.
+  gtag('config', 'G-VWXEND98Q9');
 </script>
 <!-- Vercel Web Analytics: visitas y referrers. Sin cookies, no requiere banner de consentimiento. -->
 <script defer src="/_vercel/insights/script.js"></script>
