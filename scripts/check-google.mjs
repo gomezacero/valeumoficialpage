@@ -95,7 +95,21 @@ async function checkCalendar(owner, calendarId) {
 
   const data = await res.json();
   const items = data.items || [];
-  ok(`Calendario leído correctamente (${items.length} eventos próximos)`);
+
+  // Leer el calendario no basta: con "solo libre/ocupado" los eventos llegan
+  // vacíos, sin invitados, y sin invitados no se puede cruzar la reserva con
+  // el lead. Es el fallo silencioso que este bloque evita.
+  if (data.accessRole === "freeBusyReader") {
+    bad('Compartido como "Ver solo libre/ocupado": los eventos llegan sin detalles');
+    info("Los avisos no podrían decir quién reservó ni traer sus respuestas.");
+    info("Esta persona debe cambiar el permiso de la cuenta de servicio a:");
+    info('  "Ver todos los detalles del evento"');
+    info("En Google Calendar > su calendario > Configuración y uso compartido");
+    info("> Compartir con determinadas personas > junto a la cuenta de servicio.");
+    return false;
+  }
+
+  ok(`Calendario leído correctamente como '${data.accessRole}' (${items.length} eventos próximos)`);
 
   for (const e of items.slice(0, 3)) {
     const when = e.start?.dateTime || e.start?.date || "sin fecha";
