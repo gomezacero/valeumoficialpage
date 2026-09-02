@@ -201,3 +201,50 @@ function formatWhen(iso: string): string {
     return iso;
   }
 }
+
+export interface ContactData {
+  name: string;
+  email: string;
+  whatsapp: string;
+  source: string;
+  page: string;
+}
+
+/** Correo para los formularios simples de contacto (marca personal). */
+export function contactEmail(c: ContactData): { subject: string; html: string; text: string } {
+  const subject = `💬 Nuevo contacto desde ${c.source}: ${c.name}`;
+  const waLink = c.whatsapp ? "https://wa.me/" + c.whatsapp.replace(/[^0-9]/g, "") : "";
+
+  const body = `
+    <p style="margin:0 0 20px;color:${MUTED};font-size:15px;line-height:1.6">
+      ${esc(c.name)} dejó sus datos en ${esc(c.source)}, desde
+      <a href="${esc(c.page)}" style="color:${ACCENT}">${esc(c.page)}</a>.
+    </p>
+    <table style="width:100%;border-collapse:collapse">
+      ${row("Nombre", c.name)}
+      ${row("Email", c.email)}
+      ${row("WhatsApp", c.whatsapp || "—")}
+    </table>
+    <div style="margin-top:24px">
+      ${
+        waLink
+          ? `<a href="${esc(waLink)}" style="display:inline-block;padding:13px 26px;background:#25D366;color:#fff;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none;margin-right:10px">Abrir WhatsApp</a>`
+          : ""
+      }
+      <a href="mailto:${esc(c.email)}" style="display:inline-block;padding:13px 26px;background:${ACCENT};color:#fff;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none">Responder por correo</a>
+    </div>`;
+
+  const text = [
+    `${c.name} dejó sus datos en ${c.source}.`,
+    "",
+    `Nombre: ${c.name}`,
+    `Email: ${c.email}`,
+    `WhatsApp: ${c.whatsapp || "—"}`,
+    waLink ? `Escribirle: ${waLink}` : "",
+    `Página: ${c.page}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return { subject, text, html: shell("Nuevo contacto", "Marca personal", ACCENT, body) };
+}
