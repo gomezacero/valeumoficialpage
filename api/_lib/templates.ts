@@ -208,12 +208,25 @@ export interface ContactData {
   whatsapp: string;
   source: string;
   page: string;
+  answers?: Record<string, string> | null;
+  matched?: boolean;
 }
 
 /** Correo para los formularios simples de contacto (marca personal). */
 export function contactEmail(c: ContactData): { subject: string; html: string; text: string } {
-  const subject = `💬 Nuevo contacto desde ${c.source}: ${c.name}`;
+  const califica = c.matched !== false;
+  const subject = califica
+    ? `🔥 Lead calificado desde ${c.source}: ${c.name}`
+    : `📋 Lead sin filtro desde ${c.source}: ${c.name}`;
   const waLink = c.whatsapp ? "https://wa.me/" + c.whatsapp.replace(/[^0-9]/g, "") : "";
+
+  // Las etiquetas vienen del propio formulario, así que se muestran tal cual.
+  const respuestas = c.answers
+    ? Object.entries(c.answers)
+        .filter(([, v]) => v)
+        .map(([k, v]) => row(k.replace(/_/g, " ").replace(/^./, (m) => m.toUpperCase()), v))
+        .join("")
+    : "";
 
   const body = `
     <p style="margin:0 0 20px;color:${MUTED};font-size:15px;line-height:1.6">
@@ -224,6 +237,8 @@ export function contactEmail(c: ContactData): { subject: string; html: string; t
       ${row("Nombre", c.name)}
       ${row("Email", c.email)}
       ${row("WhatsApp", c.whatsapp || "—")}
+      ${respuestas}
+      ${row("Resultado del filtro", califica ? "Encaja: vio el calendario" : "No encaja: se le mostró el mensaje de 'hoy no'")}
     </table>
     <div style="margin-top:24px">
       ${
@@ -240,11 +255,17 @@ export function contactEmail(c: ContactData): { subject: string; html: string; t
     `Nombre: ${c.name}`,
     `Email: ${c.email}`,
     `WhatsApp: ${c.whatsapp || "—"}`,
+    ...(c.answers ? Object.entries(c.answers).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`) : []),
+    `Resultado del filtro: ${califica ? "encaja" : "no encaja"}`,
     waLink ? `Escribirle: ${waLink}` : "",
     `Página: ${c.page}`,
   ]
     .filter(Boolean)
     .join("\n");
 
-  return { subject, text, html: shell("Nuevo contacto", "Marca personal", ACCENT, body) };
+  return {
+    subject,
+    text,
+    html: shell("Nuevo contacto", califica ? "Encaja" : "Sin filtro", califica ? ACCENT : MUTED, body),
+  };
 }

@@ -60,6 +60,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   const source = str(body.source, MAX.source) || "jesusmontero";
   const page = str(body.page, MAX.page);
 
+  // Respuestas del cuestionario, tal como las vio el visitante.
+  // Cada web pregunta lo suyo; se guardan en crudo sin tocar el esquema.
+  const answers =
+    body.answers && typeof body.answers === "object" && !Array.isArray(body.answers)
+      ? (Object.fromEntries(
+          Object.entries(body.answers as Record<string, unknown>)
+            .slice(0, 20)
+            .map(([k, v]) => [k.slice(0, 40), str(v, 200)])
+        ) as Record<string, string>)
+      : null;
+
+  // El filtro de la web decide si encaja; aquí solo se registra.
+  const matched = body.matched === undefined ? true : Boolean(body.matched);
+
   const errors: string[] = [];
   if (!name) errors.push("name");
   if (!EMAIL_RE.test(email)) errors.push("email");
@@ -77,9 +91,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     email,
     whatsapp,
     source,
-    // Este formulario no hace cuestionario: sin puntaje ni reparto.
+    answers,
+    // El puntaje es cosa del cuestionario de Valeum; aquí no aplica.
     score: 0,
-    matched: true,
+    matched,
     owner: "jesus",
     lang: str(body.lang, 4) || "es",
     user_agent: str(req.headers["user-agent"], 500),
@@ -112,7 +127,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
   let notified = false;
   try {
-    const mail = contactEmail({ name, email, whatsapp, source, page });
+    const mail = contactEmail({ name, email, whatsapp, source, page, answers, matched });
     await sendMail({ to: requireEnv("JESUS_EMAIL"), replyTo: email, ...mail });
     notified = true;
   } catch (err) {
