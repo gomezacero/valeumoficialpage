@@ -23,12 +23,26 @@ const OWNERS: Owner[] = ["jesus", "harry"];
 export const config = { maxDuration: 60 };
 
 /**
- * Patrón opcional del título del evento (variable BOOKING_TITLE_MATCH).
- * Solo se usa para reservas cuyo email NO coincide con ningún lead:
- * sin él, esas reuniones se ignoran para no inundar de avisos con las
- * reuniones internas normales del calendario.
+ * Títulos que identifican una reserva, separados por comas
+ * (variable BOOKING_TITLE_MATCH). Google nombra estos eventos con el
+ * título de la página de reserva, así que sirven para reconocerlas.
+ *
+ * Se usan cuando el correo de la reserva no coincide con ningún lead:
+ * sin ellos esas reuniones se ignoran, para no avisar de cada reunión
+ * interna del calendario. Cada persona tiene su propia página, de ahí
+ * que se admita más de un patrón.
  */
-const TITLE_MATCH = optionalEnv("BOOKING_TITLE_MATCH").toLowerCase();
+const TITLE_MATCHES = optionalEnv("BOOKING_TITLE_MATCH")
+  .toLowerCase()
+  .split(",")
+  .map((t) => t.trim())
+  .filter(Boolean);
+
+function pareceReserva(summary: string): boolean {
+  if (!TITLE_MATCHES.length) return false;
+  const s = summary.toLowerCase();
+  return TITLE_MATCHES.some((t) => s.includes(t));
+}
 
 interface SyncSummary {
   owner: Owner;
@@ -159,8 +173,7 @@ async function processEvent(
   // Sin lead asociado solo seguimos si el título coincide con el patrón
   // configurado; de lo contrario sería una reunión interna cualquiera.
   if (!lead) {
-    const summary = (event.summary || "").toLowerCase();
-    if (!TITLE_MATCH || !summary.includes(TITLE_MATCH)) return { stored: false, notified: false };
+    if (!pareceReserva(event.summary || "")) return { stored: false, notified: false };
     if (!attendeeEmail) return { stored: false, notified: false };
   }
 
