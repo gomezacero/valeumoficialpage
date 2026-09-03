@@ -19,6 +19,9 @@ import { bookingEmail, type LeadData } from "../_lib/templates.js";
 
 const OWNERS: Owner[] = ["jesus", "harry"];
 
+/** Vercel corta la función a los 60s; el sync debe caber de sobra. */
+export const config = { maxDuration: 60 };
+
 /**
  * Patrón opcional del título del evento (variable BOOKING_TITLE_MATCH).
  * Solo se usa para reservas cuyo email NO coincide con ningún lead:
@@ -97,8 +100,20 @@ async function syncOwner(supabase: ValeumClient, owner: Owner): Promise<SyncSumm
   let bookings = 0;
   let notified = 0;
 
-  for (const event of result.events) {
-    const processed = await processEvent(supabase, owner, ownerEmail, event);
+  // Un calendario de trabajo trae cientos de eventos internos que no son
+  // reservas. Se descartan antes de tocar la base de datos.
+  const candidatos = result.events
+    .map((event) => ({ event, guest: invitadoExterno(event, ownerEmail) }))
+    .filter(({ event, guest }) => guest || event.status === "cancelled");
+
+  // Una sola consulta para todos los correos, en vez de una por evento:
+  // era lo que agotaba el tiempo de ejecución de la función.
+  const correos = [...new Set(candidatos.map((c) => c.guest?.email).filter(Boolean) as string[])];
+  const leads = await buscarLeads(supabase, correos);
+
+  for (const { event, guest } of candidatos) {
+    const lead = guest?.email ? leads.get(guest.email.toLowerCase()) || null : null;
+    const processed = await processEvent(supabase, owner, ownerEmail, event, guest, lead);
     if (processed.stored) bookings++;
     if (processed.notified) notified++;
   }
@@ -115,25 +130,29 @@ async function syncOwner(supabase: ValeumClient, owner: Owner): Promise<SyncSumm
   return { owner, events: result.events.length, bookings, notified, fullResync };
 }
 
+type Invitado = { email?: string; displayName?: string } | undefined;
+
+/** Asistente que no es el propio dueño del calendario. */
+function invitadoExterno(event: GoogleEvent, ownerEmail: string): Invitado {
+  return (event.attendees || []).find(
+    (a) => !a.self && a.email && a.email.toLowerCase() !== ownerEmail.toLowerCase()
+  );
+}
+
 async function processEvent(
   supabase: ValeumClient,
   owner: Owner,
   ownerEmail: string,
-  event: GoogleEvent
+  event: GoogleEvent,
+  guest: Invitado,
+  lead: LeadRecord | null
 ): Promise<{ stored: boolean; notified: boolean }> {
   if (!event.id) return { stored: false, notified: false };
 
   const startsAt = event.start?.dateTime || event.start?.date || null;
   const endsAt = event.end?.dateTime || event.end?.date || null;
-
-  // Invitado = asistente que no es el propio dueño del calendario.
-  const guest = (event.attendees || []).find(
-    (a) => !a.self && a.email && a.email.toLowerCase() !== ownerEmail.toLowerCase()
-  );
   const attendeeEmail = guest?.email?.toLowerCase() || "";
   const attendeeName = guest?.displayName || "";
-
-  const lead = attendeeEmail ? await findLead(supabase, attendeeEmail) : null;
 
   // Sin lead asociado solo seguimos si el título coincide con el patrón
   // configurado; de lo contrario sería una reunión interna cualquiera.
@@ -223,18 +242,25 @@ interface LeadRecord {
   lang: string;
 }
 
-/** Lead más reciente con ese correo en los últimos 90 días. */
-async function findLead(supabase: ValeumClient, email: string): Promise<LeadRecord | null> {
+/** Trae de una sola vez los leads de todos los correos implicados. */
+async function buscarLeads(supabase: ValeumClient, correos: string[]): Promise<Map<string, LeadRecord>> {
+  const mapa = new Map<string, LeadRecord>();
+  if (!correos.length) return mapa;
+
   const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
   const { data } = await supabase
     .from("leads")
     .select("id, service, stage, budget, business, name, email, company, country, score, matched, owner, calendar_url, lang")
-    .ilike("email", email)
+    .in("email", correos)
     .gte("created_at", since)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return (data as LeadRecord | null) || null;
+    .order("created_at", { ascending: false });
+
+  // Orden descendente: el primero de cada correo es el más reciente.
+  for (const fila of (data || []) as LeadRecord[]) {
+    const clave = fila.email.toLowerCase();
+    if (!mapa.has(clave)) mapa.set(clave, fila);
+  }
+  return mapa;
 }
 
 function toLeadData(lead: LeadRecord): LeadData {

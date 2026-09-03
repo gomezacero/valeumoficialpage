@@ -11,6 +11,12 @@ import { optionalEnv, requireEnv } from "./env.js";
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 const API = "https://www.googleapis.com/calendar/v3";
 
+/** Ventana de la primera sincronización. Nadie reserva a más de 3 meses vista. */
+const WINDOW_DAYS = 90;
+
+/** Tope de páginas por calendario, por si algo devuelve muchísimo. */
+const MAX_PAGES = 10;
+
 export interface GoogleEvent {
   id: string;
   status?: string;
@@ -80,8 +86,12 @@ export async function listEvents(
   if (opts.syncToken) {
     params.set("syncToken", opts.syncToken);
   } else {
-    // Primera sincronización: solo de hoy en adelante y ya expandido.
-    params.set("timeMin", new Date().toISOString());
+    // Primera sincronización: ventana acotada. Sin timeMax, "singleEvents"
+    // expande las reuniones recurrentes sin fin y la función agota su tiempo.
+    const ahora = new Date();
+    const hasta = new Date(ahora.getTime() + WINDOW_DAYS * 24 * 60 * 60 * 1000);
+    params.set("timeMin", ahora.toISOString());
+    params.set("timeMax", hasta.toISOString());
     params.set("singleEvents", "true");
     params.set("orderBy", "startTime");
   }
@@ -108,13 +118,15 @@ export async function listAllEvents(
   const events: GoogleEvent[] = [];
   let pageToken: string | undefined;
   let finalSyncToken: string | null = null;
+  let pages = 0;
 
   do {
     const page: EventsPage = await listEvents(calendarId, { syncToken, pageToken });
     events.push(...page.items);
     pageToken = page.nextPageToken;
     if (page.nextSyncToken) finalSyncToken = page.nextSyncToken;
-  } while (pageToken);
+    pages++;
+  } while (pageToken && pages < MAX_PAGES);
 
   return { events, syncToken: finalSyncToken };
 }
