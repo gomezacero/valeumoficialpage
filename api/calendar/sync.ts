@@ -118,6 +118,8 @@ async function syncOwner(supabase: ValeumClient, owner: Owner): Promise<SyncSumm
     if (processed.notified) notified++;
   }
 
+  // En la práctica Google no lo devuelve con ventana acotada (ver google.ts),
+  // pero se guarda si algún día se cambia de estrategia.
   if (result.syncToken) {
     await supabase
       .from("calendar_sync_state")

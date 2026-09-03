@@ -72,9 +72,16 @@ export class SyncTokenExpired extends Error {
 }
 
 /**
- * Lista eventos de un calendario.
- * Con syncToken devuelve solo los cambios desde la última corrida;
- * sin él, arranca desde ahora hacia adelante.
+ * Lista eventos de un calendario dentro de una ventana de 90 días.
+ *
+ * Nota sobre el modo incremental: la API de Google no devuelve
+ * nextSyncToken cuando la petición lleva timeMin/timeMax, así que
+ * mientras se acote la ventana cada ejecución relee la ventana entera.
+ * Es asumible —tarda unos 3 segundos— y el proceso es idempotente:
+ * google_event_id es único y el flag notified evita reenviar avisos.
+ *
+ * Sin esa ventana, "singleEvents" expande las reuniones recurrentes sin
+ * fin y la función agota su tiempo, que es justo lo que ocurría antes.
  */
 export async function listEvents(
   calendarId: string,
